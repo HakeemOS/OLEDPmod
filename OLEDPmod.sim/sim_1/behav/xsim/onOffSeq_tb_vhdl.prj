@@ -1,0 +1,7 @@
+# compile vhdl design source files
+vhdl xil_defaultlib  \
+"../../../../OLEDPmod.srcs/sources_1/new/onSeq_S.vhd" \
+"../../../../OLEDPmod.srcs/sim_1/new/onOffSeq_tb.vhd" \
+
+# Do not sort compile order
+nosort
