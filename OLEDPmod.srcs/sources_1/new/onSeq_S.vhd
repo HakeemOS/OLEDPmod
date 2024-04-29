@@ -41,16 +41,17 @@ entity onSeq_S is
             OLEDVddc : out std_logic; 
             OLEDVbat : out std_logic; 
             OLEDRdy : out std_logic; 
+            byteFlag : out std_logic; 
             OLEDByte : out std_logic_vector(N-1 downto 0)
     );
 end onSeq_S;
 
 architecture Behavioral of onSeq_S is
     -- Constant --
-constant c_Delay4us : std_logic_vector(11 downto 0) := x"18F";                       -- constant = 399
-constant c_Delay200ms :  std_logic_vector(27 downto 0) := x"1312CFF";               -- constant = 19,999,99 
+constant c_Delay4us : std_logic_vector(11 downto 0) := x"18F";                          -- constant = 399
+constant c_Delay200ms :  std_logic_vector(27 downto 0) := x"1312CFF";                   -- constant = 19,999,99 
     -- State Initialization -- 
-type states is (idle, rstStt, s0, s1, s2, s3, s4);                                        
+type states is (idle, rstStt, s0, s1, s2, s3, s4, s5, s6);                              -- s0 -> s3 => On Seq; s4 - s6 => Off Seq           
 signal stt: states := idle; 
     -- Signals --
 signal powerOn : std_logic := '0'; 
@@ -60,6 +61,7 @@ signal OLEDPRst_t : std_logic := '1';
 signal OLEDVddc_t : std_logic := '0'; 
 signal OLEDVbat_t : std_logic := '0'; 
 signal OLEDRdy_t : std_logic := '0'; 
+signal byteFlag_t : std_logic := '0'; 
 signal OLEDByte_t : std_logic_vector(N-1 downto 0) := (others => '0');
 signal delay4us : std_logic_vector(11 downto 0) := (others => '0');      
 signal delay200ms : std_logic_vector(27 downto 0) := (others => '0');   
@@ -79,8 +81,8 @@ begin
                     when idle =>
                         if (powerOn = '1') then
                             stt <= s0; 
-                        --elsif (powerOff = '1') then
-                        --   
+                        elsif (powerOff = '1') then
+                            stt <= s4; 
                         else
                             stt <= idle;  
                         end if ;
@@ -105,8 +107,14 @@ begin
                         else
                             stt <= s3; 
                         end if ;
+                    when s4 => stt <= s5; 
+                    when s5 => stt <= s6; 
                     when others =>
-                
+                        if (OLEDRdy_t = '0') then
+                            stt <= idle; 
+                        else 
+                            stt <= s6; 
+                        end if ;
                 end case ;
             end if; 
         end if ;
@@ -115,6 +123,9 @@ begin
     output : process( clk, stt, sw, powerOn, powerOff, running, OLEDPRst_t, OLEDVddc_t, OLEDVbat_t, OLEDByte_t, 
                         OLEDRdy_t, delay4us, delay200ms )
     begin
+        -- Defaults --
+        byteFlag_t <= '0'; 
+
         case( stt ) is
             when rstStt => 
                 powerOn <= '0'; 
@@ -135,11 +146,9 @@ begin
                     powerOff <= '0'; 
                     running <= '1'; 
                     OLEDPRst_t <= '0'; 
-                --elsif (sw = '0' and running = '1') then
-                --    powerOn <= '0'; 
-                --    powerOff <= '1'; 
-                --    running <= '0'; 
-                --    OLEDPRst_t <= '0'; 
+                elsif (sw = '0' and running = '1') then
+                    powerOn <= '0'; 
+                    powerOff <= '1'; 
                 end if ;
             when s0 => 
                 if (rising_edge(clk)) then
@@ -162,6 +171,7 @@ begin
                 end if ;
             when s2 => 
                 OLEDByte_t <= x"AF";                                                -- display on command 
+                byteFlag_t <= '1'; 
             when s3 => 
                 if (rising_edge(clk)) then
                     if (delay200ms = c_Delay200ms) then
@@ -172,8 +182,23 @@ begin
                         delay200ms <= std_logic_vector(unsigned(delay200ms) + 1); 
                     end if ;
                 end if ;
+            when s4 => 
+                OLEDByte_t <= x"AE";
+                byteFlag_t <= '1'; 
+            when s5 => 
+                OLEDVddc_t <= '0'; 
+                OLEDVbat_t <= '0'; 
             when others =>
-        
+                if (rising_edge(clk)) then
+                    if (delay200ms = c_Delay200ms) then
+                        OLEDRdy_t <= '0';
+                        delay200ms <= (others => '0' ) ;    
+                        powerOff <= '0';      
+                        running <= '0';                               
+                    else 
+                        delay200ms <= std_logic_vector(unsigned(delay200ms) + 1); 
+                    end if ;
+                end if ;
         end case ;
     end process ; -- output
 
@@ -183,5 +208,6 @@ begin
     OLEDVddc <= OLEDVddc_t; 
     OLEDVbat <= OLEDVbat_t;
     OLEDRdy <= OLEDRdy_t; 
+    byteFlag <= byteFlag_t; 
     OLEDByte <= OLEDByte_t; 
 end Behavioral;

@@ -47,13 +47,14 @@ component onSeq_S is
             OLEDVddc : out std_logic; 
             OLEDVbat : out std_logic; 
             OLEDRdy : out std_logic; 
+            byteFlag : out std_logic; 
             OLEDByte : out std_logic_vector(N-1 downto 0)
     );
 end component; 
     -- Generic Constants -- 
 constant N : integer := 8;  
     -- Signals --
-signal clk, rst, sw, OLEDPRst, OLEDVddc, OLEDVbat, OLEDRdy : std_logic; 
+signal clk, rst, sw, OLEDPRst, OLEDVddc, OLEDVbat, OLEDRdy, byteFlag : std_logic; 
 signal OLEDByte : std_logic_vector(N-1 downto 0); 
     -- clk Signals --
 signal clk_period : time := 10ns; 
@@ -80,7 +81,8 @@ begin
         OLEDPRst => OLEDPRst, 
         OLEDVddc => OLEDVddc, 
         OLEDVbat => OLEDVbat, 
-        OLEDRdy => OLEDRdy, 
+        OLEDRdy => OLEDRdy,
+        byteFlag => byteFlag,  
         OLEDByte => OLEDByte
     ); 
 
@@ -92,6 +94,18 @@ begin
         wait for 20ns; 
 
         sw <= '1'; 
+
+        wait for 10ms; 
+        
+        rst <= '1'; 
+
+        wait for 20ns; 
+
+        rst <= '0'; 
+
+        wait for 290ms; 
+
+        sw <= '0'; 
     
         wait;  
     end process ; -- stim
