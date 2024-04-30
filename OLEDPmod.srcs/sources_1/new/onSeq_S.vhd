@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
 -- Company: 
--- Engineer: 
+-- Engineer: Hakeem S.
 -- 
 -- Create Date: 03/31/2024 09:56:04 AM
 -- Design Name: 
@@ -8,7 +8,7 @@
 -- Project Name: 
 -- Target Devices: 
 -- Tool Versions: 
--- Description: 
+-- Description: Drives on and off sequence required to turn on/off the OLED to OLEDctrlr
 -- 
 -- Dependencies: 
 -- 
