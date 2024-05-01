@@ -1,0 +1,4 @@
+Running: xsim.dir/SPITx_tb_behav/xsimk.exe -simmode gui -wdb SPITx_tb_behav.wdb -simrunnum 0 -socket 56067
+Design successfully loaded
+Design Loading Memory Usage: 6488 KB (Peak: 6488 KB)
+Design Loading CPU Usage: 30 ms

@@ -37,9 +37,11 @@ entity SPI_Tx is
     port (  clk : in std_logic;
             rst : in std_logic;  
             start : in std_logic; 
+            byteCount : in std_logic_vector(N-1 downto 0);
             byteIN : in std_logic_vector(N-1 downto 0); 
             MOSI : out std_logic; 
             CS : out std_logic; 
+            nxByte : out std_logic; 
             TxReady : out std_logic
         );
 end SPI_Tx;
@@ -47,22 +49,25 @@ end SPI_Tx;
 architecture Behavioral of SPI_Tx is
 
     -- State Initialization --
-type state is (idle, tx, rstStt);
+type state is (idle, Tx, rstStt);
 signal stt : state := idle; 
     -- Signals --
 signal done : std_logic := '0'; 
 signal MOSI_t : std_logic := '0';                                                                       -- Bit being Tx
 signal CS_t : std_logic := '1';                                                                         -- Chip select 
-signal TxReady : std_logic := '1';                                                                      -- Ready to Tx signal 
+signal nxByte_t : std_logic := '0';                                                                     -- signals to buffer to load next byte (If any)
+signal TxReady_t : std_logic := '1';                                                                    -- Ready to Tx signal 
 signal TxCount : std_logic_vector(3 downto 0) := "1000";                                                -- keeps track of which bit in byte has been tx
-signal byteReg : std_logic_vector(N-1 downto 0) := (others => '0');    
+signal byteReg : std_logic_vector(N-1 downto 0) := (others => '0');  
+signal byteCount_i : std_logic_vector(N-1 downto 0) := (others => '0');                                 -- store number of bytes to be Tx'd concurrently  
+
 
 
 begin
 
-    trns : process( clk, rst, stt, done )
+    trns : process( clk, rst, stt, done, TxReady_t )
     begin
-        if (falling_edge(clk)) then
+        if (rising_edge(clk)) then
             if (rst = '1') then
                 stt <= rstStt; 
             else
@@ -70,7 +75,7 @@ begin
                     when rstStt => stt <= idle; 
                     when idle =>
                         if (TxReady_t = '0') then
-                            stt <= tx; 
+                            stt <= Tx; 
                         else
                             stt <= idle; 
                         end if ;
@@ -78,45 +83,62 @@ begin
                         if (done = '1') then
                             stt <= idle; 
                         else
-                            stt <= tx; 
+                            stt <= Tx; 
                         end if ;
                 end case ;
             end if ;
         end if ;
     end process ; -- trns
 
-    output : process( clk, rst, stt, done, MOSI_t, CS_t )
+    output : process( clk, rst, stt, start, done, TxCount, byteCount_i )
     begin
         if (falling_edge(clk)) then
             -- Defaults --
             done <= '0'; 
+            nxByte_t <= '0';
 
             case( stt ) is
                 when rstStt =>
                     done <= '0'; 
                     MOSI_t <= '0';
                     CS_t <= '1'; 
+                    nxByte_t <= '0'; 
                     TxReady_t <= '1';  
                     TxCount <= "1000"; 
                     byteReg <= (others => '0'); 
+                    byteCount_i <= (others => '0'); 
                 when idle => 
                     TxCount <= "1000"; 
                     if (start = '1') then
                         byteReg <= byteIN; 
+                        byteCount_i <= byteCount; 
                         TxReady_t <= '0'; 
                     else
                         TxReady_t <= '1'; 
                     end if ;
                 when others =>
                     if (unsigned(TxCount) = 1) then
-                        MOSI_t <= byteReg(unsigned(TxCount)); 
-                        done <= '1';
+                        MOSI_t <= byteReg(to_integer(unsigned(TxCount) - 1));                                   -- when using std_logic_vector as index for another std_logic_vector to_integer(unsigned(...)) necessary  
+                        if (unsigned(byteCount_i) = 1) then                                                     -- if there is one byte to send end Tx, else dec number of remaining bytes and Tx next 
+                            TxCount <= "1000";
+                            nxByte_t <= '0'; 
+                            TxReady_t <= '1';
+                            CS_t <= '1'; 
+                            done <= '1';
+                        else
+                            byteCount_i <= std_logic_vector(unsigned(byteCount_i) - 1); 
+                            byteReg <= byteIN; 
+                            TxCount <= "1000";
+                        end if ;
                     elsif (unsigned(TxCount) = 8) then
                         CS_t <= '0'; 
-                        MOSI_t <= byteReg(unsigned(TxCount)); 
+                        MOSI_t <= byteReg(to_integer(unsigned(TxCount) - 1));  
                         TxCount <= std_logic_vector(unsigned(TxCount) - 1); 
+                        if (unsigned(byteCount_i) > 1) then
+                            nxByte_t <= '1';
+                        end if ;
                     elsif (unsigned(TxCount) > 1) then
-                        MOSI_t <= byteReg(unsigned(TxCount)); 
+                        MOSI_t <= byteReg(to_integer(unsigned(TxCount) - 1));  
                         TxCount <= std_logic_vector(unsigned(TxCount) - 1); 
                     end if ;
             end case ;
@@ -126,6 +148,7 @@ begin
     -- Signal to OUTs -- 
     MOSI <= MOSI_t; 
     CS <= CS_t;
+    nxByte <= nxByte_t; 
     TxReady <= TxReady_t; 
 
 end Behavioral;
