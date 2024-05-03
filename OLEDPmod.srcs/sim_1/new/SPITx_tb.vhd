@@ -89,8 +89,23 @@ begin
     begin
         start <= '0'; 
         rst <= '0'; 
-        byteCount <= "00000010"; 
-        byteIN <= "00110010"; 
+        byteCount <= "00000011"; 
+        byteIN <= "00111010"; 
+
+        wait for 20ns; 
+
+        start <= '1'; 
+
+        wait for 50ns; 
+
+        rst <= '1'; 
+         
+        wait for 10ns; 
+
+        rst <= '0'; 
+        start <= '0'; 
+        byteIN <= "11000110";
+        byteCount <= "00000100"; 
 
         wait for 20ns; 
 
@@ -99,7 +114,15 @@ begin
         wait for 50ns; 
 
         start <= '0'; 
-        byteIN <= "11000110"; 
+        byteIN <= "00001111"; 
+
+        wait for 80ns; 
+
+        byteIN <= "01011110"; 
+
+        wait for 80ns; 
+
+        byteIN <= "10010111"; 
 
 
 

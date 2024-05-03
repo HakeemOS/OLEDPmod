@@ -103,7 +103,7 @@ begin
                     MOSI_t <= '0';
                     CS_t <= '1'; 
                     nxByte_t <= '0'; 
-                    TxReady_t <= '1';  
+                    TxReady_t <= '0';  
                     TxCount <= "1000"; 
                     byteReg <= (others => '0'); 
                     byteCount_i <= (others => '0'); 

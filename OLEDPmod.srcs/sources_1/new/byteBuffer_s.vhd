@@ -22,6 +22,9 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
+library myLib; 
+use myLib.types_p.all; 
+
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
 --use IEEE.NUMERIC_STD.ALL;
@@ -31,11 +34,23 @@ use IEEE.STD_LOGIC_1164.ALL;
 --library UNISIM;
 --use UNISIM.VComponents.all;
 
-entity byteBuffer_s is
---  Port ( );
+entity byteBuffer_s is]
+    generic (N : integer := 8); 
+    port (  clk : in std_logic;  
+            rst : in std_logic; 
+            nxByte : in std_logic; 
+            bytesIN : in byteArr;                                                       -- all bytes to be Tx by SPI_Tx for specific command or data 
+            DCIN : in std_logic_vector;                                                 -- all data/command bits for each byte In
+    );
 end byteBuffer_s;
 
 architecture Behavioral of byteBuffer_s is
+
+    -- State Initialization --
+type state is (rstStt, idle, load, send); 
+signal stt : state := idle;  
+    -- Signals --
+signal bytesIN_i : byteArr (9 downto 0);                                                -- For now default max number of bytes stored is 10; 
 
 begin
 

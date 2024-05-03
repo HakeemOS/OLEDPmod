@@ -1,6 +1,6 @@
 webtalk_init -webtalk_dir C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.sim/sim_1/behav/xsim/xsim.dir/SPITx_tb_behav/webtalk/
 webtalk_register_client -client project
-webtalk_add_data -client project -key date_generated -value "Tue Apr 30 10:12:51 2024" -context "software_version_and_target_device"
+webtalk_add_data -client project -key date_generated -value "Wed May  1 09:48:20 2024" -context "software_version_and_target_device"
 webtalk_add_data -client project -key product_version -value "XSIM v2020.2 (64-bit)" -context "software_version_and_target_device"
 webtalk_add_data -client project -key build_version -value "3064766" -context "software_version_and_target_device"
 webtalk_add_data -client project -key os_platform -value "WIN64" -context "software_version_and_target_device"
@@ -14,7 +14,7 @@ webtalk_add_data -client project -key target_package -value "not_applicable" -co
 webtalk_add_data -client project -key target_speed -value "not_applicable" -context "software_version_and_target_device"
 webtalk_add_data -client project -key random_id -value "ec102472-85a9-4b1a-b496-60190195a329" -context "software_version_and_target_device"
 webtalk_add_data -client project -key project_id -value "3f89ebdd59194e6a907141978da3c8c3" -context "software_version_and_target_device"
-webtalk_add_data -client project -key project_iteration -value "29" -context "software_version_and_target_device"
+webtalk_add_data -client project -key project_iteration -value "39" -context "software_version_and_target_device"
 webtalk_add_data -client project -key os_name -value "Windows Server 2016 or Windows 10" -context "user_environment"
 webtalk_add_data -client project -key os_release -value "major release  (build 9200)" -context "user_environment"
 webtalk_add_data -client project -key cpu_name -value "Intel(R) Core(TM) i5-7600K CPU @ 3.80GHz" -context "user_environment"
@@ -36,7 +36,7 @@ webtalk_add_data -client xsim -key Total_Nets -value "0" -context "xsim\\usage"
 webtalk_add_data -client xsim -key Total_Processes -value "8" -context "xsim\\usage"
 webtalk_add_data -client xsim -key Total_Instances -value "6" -context "xsim\\usage"
 webtalk_add_data -client xsim -key Xilinx_HDL_Libraries_Used -value "secureip " -context "xsim\\usage"
-webtalk_add_data -client xsim -key Compiler_Time -value "0.84_sec" -context "xsim\\usage"
-webtalk_add_data -client xsim -key Compiler_Memory -value "61504_KB" -context "xsim\\usage"
-webtalk_transmit -clientid 3524004913 -regid "" -xml C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.sim/sim_1/behav/xsim/xsim.dir/SPITx_tb_behav/webtalk/usage_statistics_ext_xsim.xml -html C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.sim/sim_1/behav/xsim/xsim.dir/SPITx_tb_behav/webtalk/usage_statistics_ext_xsim.html -wdm C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.sim/sim_1/behav/xsim/xsim.dir/SPITx_tb_behav/webtalk/usage_statistics_ext_xsim.wdm -intro "<H3>XSIM Usage Report</H3><BR>"
+webtalk_add_data -client xsim -key Compiler_Time -value "0.87_sec" -context "xsim\\usage"
+webtalk_add_data -client xsim -key Compiler_Memory -value "61748_KB" -context "xsim\\usage"
+webtalk_transmit -clientid 1306985567 -regid "" -xml C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.sim/sim_1/behav/xsim/xsim.dir/SPITx_tb_behav/webtalk/usage_statistics_ext_xsim.xml -html C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.sim/sim_1/behav/xsim/xsim.dir/SPITx_tb_behav/webtalk/usage_statistics_ext_xsim.html -wdm C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.sim/sim_1/behav/xsim/xsim.dir/SPITx_tb_behav/webtalk/usage_statistics_ext_xsim.wdm -intro "<H3>XSIM Usage Report</H3><BR>"
 webtalk_terminate
