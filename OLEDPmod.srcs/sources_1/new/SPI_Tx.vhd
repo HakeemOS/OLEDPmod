@@ -37,7 +37,7 @@ entity SPI_Tx is
     port (  clk : in std_logic;
             rst : in std_logic;  
             start : in std_logic; 
-            byteCount : in std_logic_vector(N-1 downto 0);
+            byteCount : in std_logic_vector(3 downto 0);
             byteIN : in std_logic_vector(N-1 downto 0); 
             MOSI : out std_logic; 
             CS : out std_logic; 
@@ -59,7 +59,7 @@ signal nxByte_t : std_logic := '0';                                             
 signal TxReady_t : std_logic := '1';                                                                    -- Ready to Tx signal 
 signal TxCount : std_logic_vector(3 downto 0) := "1000";                                                -- keeps track of which bit in byte has been tx
 signal byteReg : std_logic_vector(N-1 downto 0) := (others => '0');  
-signal byteCount_i : std_logic_vector(N-1 downto 0) := (others => '0');                                 -- store number of bytes to be Tx'd concurrently  
+signal byteCount_i : std_logic_vector(3 downto 0) := (others => '0');                                 -- store number of bytes to be Tx'd successively  
 
 
 

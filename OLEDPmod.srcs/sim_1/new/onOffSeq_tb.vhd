@@ -22,6 +22,9 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
+library myLib; 
+use myLib.types_p.all;                                                                  -- used for array of bytes to be used as IN
+
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
 --use IEEE.NUMERIC_STD.ALL;
@@ -48,14 +51,14 @@ component onSeq_S is
             OLEDVbat : out std_logic; 
             OLEDRdy : out std_logic; 
             byteFlag : out std_logic; 
-            OLEDByte : out std_logic_vector(N-1 downto 0)
+            OLEDByte : out byteArr
     );
 end component; 
     -- Generic Constants -- 
 constant N : integer := 8;  
     -- Signals --
 signal clk, rst, sw, OLEDPRst, OLEDVddc, OLEDVbat, OLEDRdy, byteFlag : std_logic; 
-signal OLEDByte : std_logic_vector(N-1 downto 0); 
+signal OLEDByte : byteArr(1 downto 0); 
     -- clk Signals --
 signal clk_period : time := 10ns; 
 signal clk_stop : boolean; 
