@@ -55,19 +55,23 @@ end byteBuffer_s;
 
 architecture Behavioral of byteBuffer_s is
 
+    -- Constants --
+constant MaxBytes : integer := 10;                                                       -- Max number of bytes stored in buffer
+
     -- State Initialization --
 type state is (rstStt, idle, lx, sx);                                                   -- lx = ld = load; sx = snd = send 
 signal stt : state := idle;  
     -- Signals --
+signal nByteCount : integer range 0 to MaxBytes := 0;                                   -- byteCount Index as integer; n indicates integer; nl is natural  
 signal lxFlag : std_logic := '0'; 
 signal lxDone : std_logic := '0';     
 signal sxDone : std_logic := '0';                                                   
 signal startOUT_t : std_logic := '0'; 
 signal DCOUT_t : std_logic := '0'; 
-signal byteCountIN_i : std_logic_vector(3 downto 0) := (others => '0'); 
+signal byteCountIN_i : std_logic_vector(3 downto 0) := (others => '0');                 -- Used for keeping track of bytes recieved and ensuring same amount of bytes sent (and accomponying D/C bits)
 signal byteCountOUT_t : std_logic_vector(3 downto 0) := (others => '0');
 signal byteOUT_t : std_logic_vector(N-1 downto 0) := (others => '0'); 
-signal DCIN_i : std_logic_vector(9 downto 0) := (others => '0');                    -- since default max bytes stored is 10, 10 bit vector to store each of the accompanying D/C bits 
+signal DCIN_i : std_logic_vector(9 downto 0) := (others => '0');                        -- since default max bytes stored is 10, 10 bit vector to store each of the accompanying D/C bits 
 signal bytesIN_i : byteArr (9 downto 0) := (others => (others => '0'));                 -- For now default max number of bytes stored is 10; 
 
 
@@ -111,6 +115,10 @@ begin
     output : process( clk, rst, stt )
     begin
         if (rising_edge(clk)) then
+            -- Defaults --
+            lxFlag <= '0'; 
+            startOUT_t <= '0'; 
+
             case( stt ) is
                 when rstStt =>
                     lxDone <= '0'; 
@@ -123,10 +131,24 @@ begin
                     DCIN_i <= (others => '0'); 
                     bytesIN_i <= (others => (others => '0'));
                 when idle =>
+                    if (byteFlag = '1') then
+                        byteCountIN_i <= byteCountIN;
+                        nByteCount <= to_integer(unsigned(byteCountIN)); 
+                        lxFlag <= '1'; 
+                    else
+                        lxFlag <= '0'; 
+                    end if ;
                 when lx =>
                 when others =>
             
             end case ;
         end if ;
     end process ; -- output
+
+    -- Signal to OUTs --
+    startOUT <= startOUT_t; 
+    DCOUT <= DCOUT_t; 
+    byteCountOUT <= byteCountOUT_t; 
+    byteOUT <= byteOUT_t; 
+
 end Behavioral;

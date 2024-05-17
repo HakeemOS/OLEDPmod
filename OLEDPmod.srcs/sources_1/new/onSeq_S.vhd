@@ -176,7 +176,7 @@ begin
                 end if ;
             when s2 => 
                 OLEDByte0_t <= x"AF";                                                                       -- display on command 
-                --OLEDByteArr_t(0) <= x"AF";                                                                  -- display on command, byteArr method
+                --OLEDByteArr_t(0) <= x"AF";                                                                  -- display on command, byteArr signal method
                 byteFlag_t <= '1'; 
             when s3 => 
                 if (rising_edge(clk)) then
@@ -190,7 +190,7 @@ begin
                 end if ;
             when s4 => 
                 OLEDByte0_t <= x"AE";                                                                       -- display off command      
-                --OLEDByteArr_t(0) <= x"AF";                                                                     -- display off commmand, byteArr method   
+                --OLEDByteArr_t(0) <= x"AF";                                                                     -- display off commmand, byteArr signal method   
                 byteFlag_t <= '1'; 
             when s5 => 
                 OLEDVddc_t <= '0'; 
