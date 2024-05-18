@@ -117,6 +117,7 @@ begin
         if (rising_edge(clk)) then
             -- Defaults --
             lxFlag <= '0'; 
+            lxDone <= '0'; 
             startOUT_t <= '0'; 
 
             case( stt ) is
@@ -139,7 +140,22 @@ begin
                         lxFlag <= '0'; 
                     end if ;
                 when lx =>
+                        if (nByteCount > 1) then
+                            bytesIN_i(nByteCount - 1) <= bytesIN(nByteCount - 1); 
+                            DCIN_i(nByteCount - 1) <= DCIN(nByteCount - 1); 
+                            nByteCount <= nByteCount - 1; 
+                        else
+                            bytesIN_i(nByteCount - 1) <= bytesIN(nByteCount - 1); 
+                            DCIN_i(nByteCount - 1) <= DCIN(nByteCount - 1); 
+                            lxDone <= '1'; 
+                            nByteCount <= to_integer(unsigned(byteCountIN_i));  
+                        end if ;
                 when others =>
+                        if (nByteCount > 1 and TxReady = '1') then                                -- to start sending signal, put byteOUT and associated D/C signal on busses, send start signal to SPI_Tx Module; this should become an elsif i believe 
+                            byteOUT_t <= bytesIN_i(nByteCount - 1); 
+                            DCOUT_t <= DCIN_i(nByteCount - 1); 
+                            startOUT_t <= '1'; 
+                        end if ;
             
             end case ;
         end if ;
