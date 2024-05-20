@@ -2,3 +2,6 @@ Running: xsim.dir/SPITx_tb_behav/xsimk.exe -simmode gui -wdb SPITx_tb_behav.wdb 
 Design successfully loaded
 Design Loading Memory Usage: 6536 KB (Peak: 6536 KB)
 Design Loading CPU Usage: 46 ms
+Simulation completed
+Simulation Memory Usage: 7196 KB (Peak: 7196 KB)
+Simulation CPU Usage: 61 ms
