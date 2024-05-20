@@ -52,14 +52,15 @@ architecture Behavioral of SPI_Tx is
 type state is (idle, Tx, rstStt);
 signal stt : state := idle; 
     -- Signals --
-signal done : std_logic := '0'; 
+signal done : std_logic := '0';                                                                         -- This bit is high when the last bit of the current byte is being Tx   
+signal lBit : std_logic := '0';                                                                         -- for properly sending last bit of last byte; signal used to keep Tx from ending before last bit sits on MOSI line for 1 cycle
 signal MOSI_t : std_logic := '0';                                                                       -- Bit being Tx
 signal CS_t : std_logic := '1';                                                                         -- Chip select 
 signal nxByte_t : std_logic := '0';                                                                     -- signals to buffer to load next byte (If any)
 signal TxReady_t : std_logic := '1';                                                                    -- Ready to Tx signal 
 signal TxCount : std_logic_vector(3 downto 0) := "1000";                                                -- keeps track of which bit in byte has been tx
-signal byteReg : std_logic_vector(N-1 downto 0) := (others => '0');  
-signal byteCount_i : std_logic_vector(3 downto 0) := (others => '0');                                 -- store number of bytes to be Tx'd successively  
+signal byteReg : std_logic_vector(N-1 downto 0) := (others => '0');                                     -- stores the byte being currently sent; rec'd from byte reg 
+signal byteCount_i : std_logic_vector(3 downto 0) := (others => '0');                                   -- store number of bytes to be Tx'd successively  
 
 
 
@@ -96,6 +97,7 @@ begin
             -- Defaults --
             done <= '0'; 
             nxByte_t <= '0';
+            lBit <= '0'; 
 
             case( stt ) is
                 when rstStt =>
@@ -109,7 +111,7 @@ begin
                     byteCount_i <= (others => '0'); 
                 when idle => 
                     TxCount <= "1000"; 
-                    if (start = '1') then
+                    if (start = '1') then                                                                       -- Once start detected, whatever is on byteIN, byCount is stored 
                         byteReg <= byteIN; 
                         byteCount_i <= byteCount; 
                         TxReady_t <= '0'; 
@@ -117,27 +119,29 @@ begin
                         TxReady_t <= '1'; 
                     end if ;
                 when others =>
-                    if (unsigned(TxCount) = 1) then
+                    if (unsigned(TxCount) = 1) then                                                             -- sending last bit of current byte
                         MOSI_t <= byteReg(to_integer(unsigned(TxCount) - 1));                                   -- when using std_logic_vector as index for another std_logic_vector to_integer(unsigned(...)) necessary  
-                        if (unsigned(byteCount_i) = 1) then                                                     -- if there is one byte to send end Tx, else dec number of remaining bytes and Tx next 
+                        lBit <= '1'; 
+                        if (unsigned(byteCount_i) = 1 and lBit = '1') then                                      -- if byteCount is one AND last bit has sent (lBit = '1') end Tx, else dec number of remaining bytes and Tx next 
                             TxCount <= "1000";
                             nxByte_t <= '0'; 
                             TxReady_t <= '1';
                             CS_t <= '1'; 
                             done <= '1';
-                        else
+                            lBit <= '0'; 
+                        elsif (unsigned(byteCount_i) > 1) then                                                  -- when it is not the last byte being sent 
                             byteCount_i <= std_logic_vector(unsigned(byteCount_i) - 1); 
                             byteReg <= byteIN; 
                             TxCount <= "1000";
                         end if ;
-                    elsif (unsigned(TxCount) = 8) then
+                    elsif (unsigned(TxCount) = 8) then                                                          -- sending first bit of current byte 
                         CS_t <= '0'; 
                         MOSI_t <= byteReg(to_integer(unsigned(TxCount) - 1));  
                         TxCount <= std_logic_vector(unsigned(TxCount) - 1); 
                         if (unsigned(byteCount_i) > 1) then
                             nxByte_t <= '1';
                         end if ;
-                    elsif (unsigned(TxCount) > 1) then
+                    elsif (unsigned(TxCount) > 1) then                                                          -- sending second to second last bit of current byte 
                         MOSI_t <= byteReg(to_integer(unsigned(TxCount) - 1));  
                         TxCount <= std_logic_vector(unsigned(TxCount) - 1); 
                     end if ;

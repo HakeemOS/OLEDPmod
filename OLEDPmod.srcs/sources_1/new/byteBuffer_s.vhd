@@ -64,7 +64,8 @@ signal stt : state := idle;
     -- Signals --
 signal nByteCount : integer range 0 to MaxBytes := 0;                                   -- byteCount Index as integer; n indicates integer; nl is natural  
 signal lxFlag : std_logic := '0'; 
-signal lxDone : std_logic := '0';     
+signal lxDone : std_logic := '0';   
+signal sxFlag : std_logic := '0';   
 signal sxDone : std_logic := '0';                                                   
 signal startOUT_t : std_logic := '0'; 
 signal DCOUT_t : std_logic := '0'; 
@@ -156,15 +157,16 @@ begin
                         sxFlag <= '0'; 
                         sxDone <= '1'; 
                     elsif (sxFlag = '1' and nxByte = '1') then                          -- SPI signals ready for next byte 
-                        
+                        byteOUT_t <= bytesIN_i(nByteCount - 1); 
+                        DCOUT_t <= DCIN_i(nByteCount - 1); 
                     end if ;
                     if (TxReady = '1') then                                             -- to start sending signal, put byteOUT and associated D/C signal on busses, send start signal to SPI_Tx Module; this should become an elsif i believe 
                         byteOUT_t <= bytesIN_i(nByteCount - 1); 
                         DCOUT_t <= DCIN_i(nByteCount - 1); 
                         startOUT_t <= '1'; 
                         sxFlag <= '1'; 
-                        nByteCount <= nByteCount - 1; 
-                    elsif (TxReady = '0') then
+                        nByteCount <= nByteCount - 1;                                   -- dec index used for selecting byte to send in byteArr
+                    elsif (TxReady = '0') then                                          -- waiting for SPI_Tx to be ready
                         null; 
                     end if ;
             end case ;
