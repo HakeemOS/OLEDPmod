@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
 -- Company: 
--- Engineer: 
+-- Engineer: Hakeem S. 
 -- 
 -- Create Date: 04/29/2024 06:17:46 PM
 -- Design Name: 
@@ -140,23 +140,33 @@ begin
                         lxFlag <= '0'; 
                     end if ;
                 when lx =>
-                        if (nByteCount > 1) then
-                            bytesIN_i(nByteCount - 1) <= bytesIN(nByteCount - 1); 
-                            DCIN_i(nByteCount - 1) <= DCIN(nByteCount - 1); 
-                            nByteCount <= nByteCount - 1; 
-                        else
-                            bytesIN_i(nByteCount - 1) <= bytesIN(nByteCount - 1); 
-                            DCIN_i(nByteCount - 1) <= DCIN(nByteCount - 1); 
-                            lxDone <= '1'; 
-                            nByteCount <= to_integer(unsigned(byteCountIN_i));  
-                        end if ;
+                    if (nByteCount > 1) then
+                        bytesIN_i(nByteCount - 1) <= bytesIN(nByteCount - 1); 
+                        DCIN_i(nByteCount - 1) <= DCIN(nByteCount - 1); 
+                        nByteCount <= nByteCount - 1; 
+                    else
+                        bytesIN_i(nByteCount - 1) <= bytesIN(nByteCount - 1); 
+                        DCIN_i(nByteCount - 1) <= DCIN(nByteCount - 1); 
+                        lxDone <= '1'; 
+                        nByteCount <= to_integer(unsigned(byteCountIN_i));  
+                    end if ;
                 when others =>
-                        if (nByteCount > 1 and TxReady = '1') then                                -- to start sending signal, put byteOUT and associated D/C signal on busses, send start signal to SPI_Tx Module; this should become an elsif i believe 
-                            byteOUT_t <= bytesIN_i(nByteCount - 1); 
-                            DCOUT_t <= DCIN_i(nByteCount - 1); 
-                            startOUT_t <= '1'; 
-                        end if ;
-            
+                    byteCountOUT_t <= byteCountIN_i; 
+                    if (sxFlag = '1' and nByteCount = 0) then                           -- last byte has been sent to SPI_Tx; sending flag => low, sending done => hi 
+                        sxFlag <= '0'; 
+                        sxDone <= '1'; 
+                    elsif (sxFlag = '1' and nxByte = '1') then                          -- SPI signals ready for next byte 
+                        
+                    end if ;
+                    if (TxReady = '1') then                                             -- to start sending signal, put byteOUT and associated D/C signal on busses, send start signal to SPI_Tx Module; this should become an elsif i believe 
+                        byteOUT_t <= bytesIN_i(nByteCount - 1); 
+                        DCOUT_t <= DCIN_i(nByteCount - 1); 
+                        startOUT_t <= '1'; 
+                        sxFlag <= '1'; 
+                        nByteCount <= nByteCount - 1; 
+                    elsif (TxReady = '0') then
+                        null; 
+                    end if ;
             end case ;
         end if ;
     end process ; -- output

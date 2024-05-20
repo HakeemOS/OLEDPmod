@@ -43,7 +43,7 @@ component SPI_Tx is
     port (  clk : in std_logic;
             rst : in std_logic; 
             start : in std_logic; 
-            byteCount : in std_logic_vector(N-1 downto 0); 
+            byteCount : in std_logic_vector(3 downto 0); 
             byteIN : in std_logic_vector(N-1 downto 0); 
             MOSI : out std_logic; 
             CS : out std_logic; 
@@ -54,8 +54,9 @@ end component;
     -- Generic Constants -- 
 constant N : integer := 8; 
     -- Signals --
-signal clk, rst, start, MOSI, CS, nxByte, TxReady : std_logic; 
-signal byteCount, byteIN : std_logic_vector(N-1 downto 0); 
+signal clk, rst, start, MOSI, CS, nxByte, TxReady : std_logic;
+signal byteCount : std_logic_vector(3 downto 0);  
+signal byteIN : std_logic_vector(N-1 downto 0); 
     -- clk Signals --
 signal clk_period : time := 10ns; 
 signal clk_stop : boolean; 
@@ -89,7 +90,7 @@ begin
     begin
         start <= '0'; 
         rst <= '0'; 
-        byteCount <= "00000011"; 
+        byteCount <= "0011"; 
         byteIN <= "00111010"; 
 
         wait for 20ns; 
@@ -105,7 +106,7 @@ begin
         rst <= '0'; 
         start <= '0'; 
         byteIN <= "11000110";
-        byteCount <= "00000100"; 
+        byteCount <= "0100"; 
 
         wait for 20ns; 
 
