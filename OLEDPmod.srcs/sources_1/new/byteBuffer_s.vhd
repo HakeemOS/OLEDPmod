@@ -39,13 +39,14 @@ entity byteBuffer_s is
     generic (N : integer := 8); 
     port (  clk : in std_logic;  
             rst : in std_logic; 
-            startRdy : in std_logic;                                                    -- indicates all bytes recieved; Ready to start Tx  
+            -- startRdy : in std_logic;                                                    -- indicates all bytes recieved; Ready to start Tx  
             byteFlag : in std_logic;                                                    -- byte(s) are ready to be captured in buffer
             TxReady : in std_logic;                                                     -- SPI_Tx ready to Tx 
             nxByte : in std_logic;                                                      -- SPI_Tx ready for next byte in current data/command sequence 
             byteCountIN : in std_logic_vector(3 downto 0);                              -- number of bytes to Tx 
-            bytesIN : in byteArr;                                                       -- all bytes to be Tx by SPI_Tx for specific command or data 
             DCIN : in std_logic_vector;                                                 -- all data/command bits for each byte In
+            bytesIN : in byteArr;                                                       -- all bytes to be Tx by SPI_Tx for specific command or data 
+            rdy : out std_logic;                                                        -- flag for other modules to see buffer can receive 
             startOUT : out std_logic;                                                   -- start signal sent to SPI_Tx
             DCOUT: out std_logic;                                                       -- current data/command bit to be Tx
             byteCountOUT : out std_logic_vector(3 downto 0); 
@@ -66,7 +67,8 @@ signal nByteCount : integer range 0 to MaxBytes := 0;                           
 signal lxFlag : std_logic := '0'; 
 signal lxDone : std_logic := '0';   
 signal sxFlag : std_logic := '0';   
-signal sxDone : std_logic := '0';                                                   
+signal sxDone : std_logic := '0';   
+signal rdy_t : std_logic := '1';                                                 
 signal startOUT_t : std_logic := '0'; 
 signal DCOUT_t : std_logic := '0'; 
 signal byteCountIN_i : std_logic_vector(3 downto 0) := (others => '0');                 -- Used for keeping track of bytes recieved and ensuring same amount of bytes sent (and accomponying D/C bits)
@@ -125,6 +127,7 @@ begin
                 when rstStt =>
                     lxDone <= '0'; 
                     sxDone <= '0';
+                    rdy_t <= '1'; 
                     startOUT_t <= '0'; 
                     DCOUT_t <= '0'; 
                     byteCountIN_i <= (others => '0'); 
@@ -133,6 +136,7 @@ begin
                     DCIN_i <= (others => '0'); 
                     bytesIN_i <= (others => (others => '0'));
                 when idle =>
+                    rdy_t <= '1'; 
                     if (byteFlag = '1') then
                         byteCountIN_i <= byteCountIN;
                         nByteCount <= to_integer(unsigned(byteCountIN)); 
@@ -141,14 +145,20 @@ begin
                         lxFlag <= '0'; 
                     end if ;
                 when lx =>
-                    if (nByteCount > 1) then
+                    rdy_t <= '0';                                                       -- rdy = 0 indicates buffer is loading/sending data already, cannot load more
+                    if (nByteCount = 2) then
+                        bytesIN_i(nByteCount - 1) <= bytesIN(nByteCount - 1); 
+                        DCIN_i(nByteCount - 1) <= DCIN(nByteCount - 1); 
+                        nByteCount <= nByteCount - 1; 
+                        lxDone <= '1'; 
+                    elsif (nByteCount > 1) then
                         bytesIN_i(nByteCount - 1) <= bytesIN(nByteCount - 1); 
                         DCIN_i(nByteCount - 1) <= DCIN(nByteCount - 1); 
                         nByteCount <= nByteCount - 1; 
                     else
                         bytesIN_i(nByteCount - 1) <= bytesIN(nByteCount - 1); 
                         DCIN_i(nByteCount - 1) <= DCIN(nByteCount - 1); 
-                        lxDone <= '1'; 
+                        --lxDone <= '1'; 
                         nByteCount <= to_integer(unsigned(byteCountIN_i));  
                     end if ;
                 when others =>
@@ -159,14 +169,14 @@ begin
                     elsif (sxFlag = '1' and nxByte = '1') then                          -- SPI signals ready for next byte 
                         byteOUT_t <= bytesIN_i(nByteCount - 1); 
                         DCOUT_t <= DCIN_i(nByteCount - 1); 
-                    end if ;
-                    if (TxReady = '1') then                                             -- to start sending signal, put byteOUT and associated D/C signal on busses, send start signal to SPI_Tx Module; this should become an elsif i believe 
+                        nByteCount <= nByteCount - 1;                                   -- dec index used for selecting byte to send in byteArr
+                    elsif (TxReady = '1' and sxFlag = '0') then                         -- to start sending signal, put byteOUT and associated D/C signal on busses, send start signal to SPI_Tx Module; this should become an elsif i believe 
                         byteOUT_t <= bytesIN_i(nByteCount - 1); 
                         DCOUT_t <= DCIN_i(nByteCount - 1); 
                         startOUT_t <= '1'; 
                         sxFlag <= '1'; 
                         nByteCount <= nByteCount - 1;                                   -- dec index used for selecting byte to send in byteArr
-                    elsif (TxReady = '0') then                                          -- waiting for SPI_Tx to be ready
+                    else                                                                -- waiting for SPI_Tx to be ready
                         null; 
                     end if ;
             end case ;
@@ -174,6 +184,7 @@ begin
     end process ; -- output
 
     -- Signal to OUTs --
+    rdy <= rdy_t; 
     startOUT <= startOUT_t; 
     DCOUT <= DCOUT_t; 
     byteCountOUT <= byteCountOUT_t; 
