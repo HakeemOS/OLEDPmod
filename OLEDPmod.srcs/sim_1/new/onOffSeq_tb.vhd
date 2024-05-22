@@ -51,6 +51,7 @@ component onSeq_S is
             OLEDVbat : out std_logic; 
             OLEDRdy : out std_logic; 
             byteFlag : out std_logic; 
+            byteCount : out std_logic_vector(3 downto 0); 
             OLEDByte : out byteArr
     );
 end component; 
@@ -58,6 +59,7 @@ end component;
 constant N : integer := 8;  
     -- Signals --
 signal clk, rst, sw, OLEDPRst, OLEDVddc, OLEDVbat, OLEDRdy, byteFlag : std_logic; 
+signal byteCount : std_logic_vector(3 downto 0); 
 signal OLEDByte : byteArr(1 downto 0); 
     -- clk Signals --
 signal clk_period : time := 10ns; 
@@ -86,10 +88,11 @@ begin
         OLEDVbat => OLEDVbat, 
         OLEDRdy => OLEDRdy,
         byteFlag => byteFlag,  
+        byteCount => byteCount, 
         OLEDByte => OLEDByte
     ); 
 
-    stim : process 
+    stim : process                              -- to complete sim run for approximately 510ms; always delete generated wave file
     begin
         sw <= '0'; 
         rst <= '0'; 

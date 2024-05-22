@@ -21,10 +21,10 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-use IEEE.NUMERIC_STD.ALL;                                                   -- used for incrementing vector (unsigned())
+use IEEE.NUMERIC_STD.ALL;                                                                                   -- used for incrementing vector (unsigned())
 
-library myLib; 
-use myLib.types_p.all;                                                                  -- used for array of bytes to be used as IN
+library myLib;                  
+use myLib.types_p.all;                                                                                      -- used for array of bytes to be used as IN
 
 -- Uncomment the following library declaration if using
 -- arithmetic functions with Signed or Unsigned values
@@ -45,6 +45,7 @@ entity onSeq_S is
             OLEDVbat : out std_logic; 
             OLEDRdy : out std_logic;                                                                        -- signals to OLEDCtrl On/OFF seq complete 
             byteFlag : out std_logic; 
+            byteCount : out std_logic_vector(3 downto 0); 
             OLEDByte : out byteArr
     );
 end onSeq_S;
@@ -65,6 +66,7 @@ signal OLEDVddc_t : std_logic := '0';
 signal OLEDVbat_t : std_logic := '0'; 
 signal OLEDRdy_t : std_logic := '0'; 
 signal byteFlag_t : std_logic := '0'; 
+signal byteCount_t : std_logic_vector (3 downto 0) := (others => '0'); 
 signal OLEDByte0_t : std_logic_vector(N-1 downto 0) := (others => '0');                                     -- byte to fill 0th position of OLEDByte byteArr
 signal OLEDByte1_t : std_logic_vector(N-1 downto 0) := (others => '0');                                     -- byte to fill 1st position of OLEDByte byteArr; if only one byte is sent in final design remove this once simulating is complete 
 --signal OLEDByteArr_t : byteArr (3 downto 0) := ( others => (others => '0'));                                -- another solution; create byte array and fill first position with on/off commands 
@@ -140,6 +142,7 @@ begin
                 OLEDVddc_t <= '0'; 
                 OLEDVbat_t <= '0';
                 OLEDRdy_t <= '0'; 
+                byteCount_t <= (others => '0'); 
                 OLEDByte0_t <= (others => '0'); 
                 delay4us <= (others => '0'); 
                 delay200ms <= (others => '0'); 
@@ -177,6 +180,7 @@ begin
             when s2 => 
                 OLEDByte0_t <= x"AF";                                                                       -- display on command 
                 --OLEDByteArr_t(0) <= x"AF";                                                                  -- display on command, byteArr signal method
+                byteCount_t <= std_logic_vector(to_unsigned(1, 4));                                         -- must use to_unsigned(convertingInt, vectorLength) to cast a integer value on its own (called universal int) to a std_logic_vector 
                 byteFlag_t <= '1'; 
             when s3 => 
                 if (rising_edge(clk)) then
@@ -191,6 +195,7 @@ begin
             when s4 => 
                 OLEDByte0_t <= x"AE";                                                                       -- display off command      
                 --OLEDByteArr_t(0) <= x"AF";                                                                     -- display off commmand, byteArr signal method   
+                byteCount_t <= std_logic_vector(to_unsigned(1, 4));
                 byteFlag_t <= '1'; 
             when s5 => 
                 OLEDVddc_t <= '0'; 
@@ -216,6 +221,7 @@ begin
     OLEDVbat <= OLEDVbat_t;
     OLEDRdy <= OLEDRdy_t; 
     byteFlag <= byteFlag_t; 
+    byteCount <= byteCount_t; 
     OLEDByte(0) <= (OLEDByte0_t); 
     OLEDByte(1) <= (OLEDByte1_t); 
     --OLEDByte <= OLEDByteArr_t; 
