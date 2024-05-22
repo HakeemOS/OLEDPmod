@@ -68,6 +68,7 @@ signal lxFlag : std_logic := '0';
 signal lxDone : std_logic := '0';   
 signal sxFlag : std_logic := '0';   
 signal sxDone : std_logic := '0';   
+signal oneByte : std_logic := '0';                                                      -- for special case; only one byte to buffer
 signal rdy_t : std_logic := '1';                                                 
 signal startOUT_t : std_logic := '0'; 
 signal DCOUT_t : std_logic := '0'; 
@@ -94,7 +95,7 @@ begin
                             stt <= idle; 
                         end if ;
                     when lx =>
-                        if (lxDone = '1') then
+                        if (lxDone = '1' or oneByte = '1') then
                             stt <= sx; 
                         else
                             stt <= lx; 
@@ -115,7 +116,7 @@ begin
         
     end process ; -- trns
 
-    output : process( clk, rst, stt )
+    output : process( clk, rst, stt)
     begin
         if (rising_edge(clk)) then
             -- Defaults --
@@ -136,29 +137,35 @@ begin
                     DCIN_i <= (others => '0'); 
                     bytesIN_i <= (others => (others => '0'));
                 when idle =>
-                    rdy_t <= '1'; 
+                    rdy_t <= '1';                                                       -- rdy doesnt have to be high right at start of idle state since SPI_Tx will still be TX once buffer is idle for about 3-4 cycles
                     if (byteFlag = '1') then
                         byteCountIN_i <= byteCountIN;
                         nByteCount <= to_integer(unsigned(byteCountIN)); 
                         lxFlag <= '1'; 
+                        if (unsigned(byteCountIN) = 1) then                             -- for special case; if only one byte in set oneByte Hi (used to flag lx state to load for 1 cycle only)
+                            oneByte <= '1'; 
+                        end if ;
                     else
                         lxFlag <= '0'; 
                     end if ;
                 when lx =>
                     rdy_t <= '0';                                                       -- rdy = 0 indicates buffer is loading/sending data already, cannot load more
-                    if (nByteCount = 2) then
+                    if (nByteCount = 2) then                                            -- set lxDone on second last byte load, one extra byte load occurs while lxDone is being detected by trns proc
                         bytesIN_i(nByteCount - 1) <= bytesIN(nByteCount - 1); 
                         DCIN_i(nByteCount - 1) <= DCIN(nByteCount - 1); 
                         nByteCount <= nByteCount - 1; 
                         lxDone <= '1'; 
-                    elsif (nByteCount > 1) then
+                    elsif (nByteCount > 1) then                                         -- normal lx of bytes and D/C bits
                         bytesIN_i(nByteCount - 1) <= bytesIN(nByteCount - 1); 
                         DCIN_i(nByteCount - 1) <= DCIN(nByteCount - 1); 
                         nByteCount <= nByteCount - 1; 
-                    else
+                    elsif (oneByte = '1') then                                          -- for special case; if only one byte to buffer store byte in byteArr(0) and D/C in DCIN(0) and stt trns; 
+                        oneByte <= '0'; 
                         bytesIN_i(nByteCount - 1) <= bytesIN(nByteCount - 1); 
                         DCIN_i(nByteCount - 1) <= DCIN(nByteCount - 1); 
-                        --lxDone <= '1'; 
+                    else                                                                -- occurs on last cycle 
+                        bytesIN_i(nByteCount - 1) <= bytesIN(nByteCount - 1); 
+                        DCIN_i(nByteCount - 1) <= DCIN(nByteCount - 1);                                             
                         nByteCount <= to_integer(unsigned(byteCountIN_i));  
                     end if ;
                 when others =>

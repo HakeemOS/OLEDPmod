@@ -109,6 +109,7 @@ begin
         nxByte <= '0'; 
         byteCountIN <= x"3"; 
         DCIN <= "010"; 
+        --bytesIN <= (x"00", x"00", x"a6"); 
         bytesIN <= (x"a6", x"f7", x"2e" ); 
 
         wait for 20ns; 
@@ -119,7 +120,29 @@ begin
         
         byteFlag <= '0'; 
 
-        
+        wait for 70ns; 
+
+        TxReady <= '1'; 
+
+        wait for 20ns; 
+
+        TxReady <= '0'; 
+
+        wait for 10ns; 
+
+        nxByte <= '1'; 
+
+        wait for 10ns; 
+
+        nxByte <= '0'; 
+
+        wait for 70ns; 
+
+        nxByte <= '1'; 
+
+        wait for 10ns; 
+
+        nxByte <= '0'; 
 
         wait; 
 
