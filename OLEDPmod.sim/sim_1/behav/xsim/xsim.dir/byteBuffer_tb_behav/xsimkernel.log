@@ -2,3 +2,6 @@ Running: xsim.dir/byteBuffer_tb_behav/xsimk.exe -simmode gui -wdb byteBuffer_tb_
 Design successfully loaded
 Design Loading Memory Usage: 6548 KB (Peak: 6548 KB)
 Design Loading CPU Usage: 15 ms
+Simulation completed
+Simulation Memory Usage: 7208 KB (Peak: 7208 KB)
+Simulation CPU Usage: 62 ms

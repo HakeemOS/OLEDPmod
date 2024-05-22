@@ -43,7 +43,7 @@ entity onSeq_S is
             OLEDPRst : out std_logic; 
             OLEDVddc : out std_logic; 
             OLEDVbat : out std_logic; 
-            OLEDRdy : out std_logic; 
+            OLEDRdy : out std_logic;                                                                        -- signals to OLEDCtrl On/OFF seq complete 
             byteFlag : out std_logic; 
             OLEDByte : out byteArr
     );

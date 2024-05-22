@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
 -- Company: 
--- Engineer: 
+-- Engineer: Hakeem S.
 -- 
 -- Create Date: 04/04/2024 09:44:00 AM
 -- Design Name: 
@@ -8,7 +8,7 @@
 -- Project Name: 
 -- Target Devices: 
 -- Tool Versions: 
--- Description: 
+-- Description: 7.143 Mhz clock for SPI_Tx 
 -- 
 -- Dependencies: 
 -- 
