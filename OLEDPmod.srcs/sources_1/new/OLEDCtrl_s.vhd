@@ -98,9 +98,10 @@ end component;
     -- State Initialization --  
 type state is (rstStt, idle, active); 
 signal stt : state := idle; 
-    -- Signals -- 
-signal byteFlag_i : std_logic := '0'; 
+    -- Signals --                                                                       -- for signals; i => inReg, w => wire, t => tempReg (for out)
+signal byteFlag_i : std_logic := '0';                                                   
 signal byteFlag_w : std_logic := '0'; 
+signal byteSel : std_logic := '0'; 
 signal nxByte_w : std_logic := '0'; 
 signal OLEDPRst_t : std_logic := '1';
 signal OLEDVddc_t : std_logic := '0'; 
@@ -114,18 +115,29 @@ signal startOUT_w : std_logic := '0';
 signal TxReady_w : std_logic := '0'; 
 signal byteCountIN_i : std_logic_vector(3 downto 0) := (others => '0'); 
 signal byteCountIN_w : std_logic_vector(3 downto 0) := (others => '0'); 
+signal byteCountINDummy : std_logic_vector(3 downto 0) := (others => '0');  
 signal byteCountOUT_w : std_logic_vector(3 downto 0) := (others => '0');
 signal byteOUT_w : std_logic_vector (N-1 downto 0) := (others => '0'); 
-signal DCIN_i : std_logic_vector(9 downto 0) := (others => '0'); 
+signal DCIN_i : std_logic_vector(9 downto 0) := (0 => '1', others => '0'); 
 signal DCIN_w : std_logic_vector(9 downto 0) := (others => '0'); 
+signal DCINDummy : std_logic_vector(9 downto 0) := (others => '0'); 
 signal bytesIN_i : byteArr (9 downto 0) := (others => (others => '0')); 
 signal bytesIN_w : byteArr (9 downto 0) := (others => (others => '0')); 
+signal bytesINDummy : byteArr (9 downto 0) := (others => (others => 'z'));
 
 begin
     -- IN to signal --
     OLEDPRst_t <= OLEDPRstIN;
     OLEDVddc_t <= OLEDVddcIN; 
     OLEDVbat_t <= OLEDVbatIN; 
+    byteSel <= onOffFlag; 
+    byteCountIN <= byteCountIN_i; 
+    bytesIN_i <= bytesIN; 
+
+    -- MUXs --
+    bytesIN_w <= bytesIN_i when byteSel else bytesINDummy;                              -- select bytes from onSeq when onSeq byteFlag goes high else select internal byte source
+    byteCountIN_w <= byteCountIN_i when byteSel else byteCountINDummy;                  -- same as above but for byte count 
+    DCIN_w <= DCIN_i when bytesel else DCINDummy;                                       -- same as above but for D/C vector; DCIN+i initialized to what onSeq default is, when reset or after used by another potential module, returns to default of LSB = '1'
 
     BB0 : byteBuffer_s 
     generic map (
@@ -163,6 +175,8 @@ begin
             nxByte => nxByte_w, 
             TxReady => TxReady_w
     ); 
+
+    
 
     -- Signal to OUT --
     sclkOUT <= sclkIN; 
