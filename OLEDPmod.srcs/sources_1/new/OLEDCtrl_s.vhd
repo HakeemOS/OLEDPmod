@@ -96,12 +96,13 @@ end component;
 
     -- Constants --
     -- State Initialization --  
-type state is (rstStt, idle, active); 
+type state is (rstStt, idle, tx); 
 signal stt : state := idle; 
     -- Signals --                                                                       -- for signals; i => inReg, w => wire, t => tempReg (for out)
 signal byteFlag_i : std_logic := '0';                                                   
 signal byteFlag_w : std_logic := '0'; 
 signal byteSel : std_logic := '0'; 
+signal done : std_logic := '0'; 
 signal nxByte_w : std_logic := '0'; 
 signal OLEDPRst_t : std_logic := '1';
 signal OLEDVddc_t : std_logic := '0'; 
@@ -113,6 +114,7 @@ signal MOSI_t : std_logic := '0';
 signal rdy_w : std_logic := '0'; 
 signal startOUT_w : std_logic := '0'; 
 signal TxReady_w : std_logic := '0'; 
+signal TxFlag := std+logic := '0'; 
 signal byteCountIN_i : std_logic_vector(3 downto 0) := (others => '0'); 
 signal byteCountIN_w : std_logic_vector(3 downto 0) := (others => '0'); 
 signal byteCountINDummy : std_logic_vector(3 downto 0) := (others => '0');  
@@ -176,6 +178,34 @@ begin
             TxReady => TxReady_w
     ); 
 
+    trns : process( clk, rst, stt )
+    begin
+        if (rising_edge(clk)) then
+            if (rst = '1') then
+                stt <= rstStt; 
+            else
+                case( stt ) is
+                    when rstStt => stt <= idle; 
+                    when idle => 
+                        if (TxFlag = '1') then
+                            stt <= tx; 
+                        else
+                            stt <= idle;
+                        end if ;
+                    when others =>
+                        if (expression) then
+                            
+                        end if ;
+                end case ;
+            end if ;
+        end if ;
+        
+    end process ; -- trns
+
+    ouitput : process( clk, rst, stt )
+    begin
+        
+    end process ; -- ouitput
     
 
     -- Signal to OUT --
