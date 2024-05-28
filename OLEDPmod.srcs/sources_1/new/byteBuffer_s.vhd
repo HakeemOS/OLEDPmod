@@ -140,7 +140,7 @@ begin
                     rdy_t <= '1';                                                       -- rdy doesnt have to be high right at start of idle state since SPI_Tx will still be TX once buffer is idle for about 3-4 cycles
                     if (byteFlag = '1') then
                         byteCountIN_i <= byteCountIN;
-                        nByteCount <= to_integer(unsigned(byteCountIN)); 
+                        nByteCount <= to_integer(unsigned(byteCountIN));                -- load IN byteCount to integer sig
                         lxFlag <= '1'; 
                         if (unsigned(byteCountIN) = 1) then                             -- for special case; if only one byte in set oneByte Hi (used to flag lx state to load for 1 cycle only)
                             oneByte <= '1'; 
