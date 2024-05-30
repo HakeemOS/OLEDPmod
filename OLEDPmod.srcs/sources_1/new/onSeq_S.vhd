@@ -45,6 +45,7 @@ entity onSeq_S is
             OLEDVbat : out std_logic; 
             OLEDRdy : out std_logic;                                                                        -- signals to OLEDCtrl On/OFF seq complete 
             byteFlag : out std_logic; 
+            DCOUT : out std_logic_vector;                                                                   -- vector of D/C bits following same index as array of bytes (i.e corresponding D/C bit of byte at pos 1 also at pos 1 of vector)
             byteCount : out std_logic_vector(3 downto 0); 
             OLEDByte : out byteArr
     );
@@ -65,8 +66,9 @@ signal OLEDPRst_t : std_logic := '1';
 signal OLEDVddc_t : std_logic := '0'; 
 signal OLEDVbat_t : std_logic := '0'; 
 signal OLEDRdy_t : std_logic := '0'; 
-signal byteFlag_t : std_logic := '0'; 
+signal byteFlag_t : std_logic := '0';
 signal byteCount_t : std_logic_vector (3 downto 0) := (others => '0'); 
+signal DCOUT_t : std_logic_vector(3 downto 0) := (others => '0');                                           -- length 4 vector limits number of D/C bits and therefore bytes OUT by this module to 4 
 signal OLEDByte0_t : std_logic_vector(N-1 downto 0) := (others => '0');                                     -- byte to fill 0th position of OLEDByte byteArr
 signal OLEDByte1_t : std_logic_vector(N-1 downto 0) := (others => '0');                                     -- byte to fill 1st position of OLEDByte byteArr; if only one byte is sent in final design remove this once simulating is complete 
 --signal OLEDByteArr_t : byteArr (3 downto 0) := ( others => (others => '0'));                                -- another solution; create byte array and fill first position with on/off commands 
@@ -143,6 +145,7 @@ begin
                 OLEDVbat_t <= '0';
                 OLEDRdy_t <= '0'; 
                 byteCount_t <= (others => '0'); 
+                DCOUT_t <= (others => '0'); 
                 OLEDByte0_t <= (others => '0'); 
                 delay4us <= (others => '0'); 
                 delay200ms <= (others => '0'); 
@@ -179,6 +182,7 @@ begin
                 end if ;
             when s2 => 
                 OLEDByte0_t <= x"AF";                                                                       -- display on command 
+                DCOUT_t <= "0000";                                                                          -- only one LSB meaningful data D/C = => command byte 
                 --OLEDByteArr_t(0) <= x"AF";                                                                  -- display on command, byteArr signal method
                 byteCount_t <= std_logic_vector(to_unsigned(1, 4));                                         -- must use to_unsigned(convertingInt, vectorLength) to cast a integer value on its own (called universal int) to a std_logic_vector 
                 byteFlag_t <= '1'; 
@@ -193,7 +197,8 @@ begin
                     end if ;
                 end if ;
             when s4 => 
-                OLEDByte0_t <= x"AE";                                                                       -- display off command      
+                OLEDByte0_t <= x"AE";                                                                       -- display off command     
+                DCOUT_t <= "0000";                                                                          -- only one LSB meaningful data D/C = => command byte  
                 --OLEDByteArr_t(0) <= x"AF";                                                                     -- display off commmand, byteArr signal method   
                 byteCount_t <= std_logic_vector(to_unsigned(1, 4));
                 byteFlag_t <= '1'; 
@@ -222,6 +227,7 @@ begin
     OLEDRdy <= OLEDRdy_t; 
     byteFlag <= byteFlag_t; 
     byteCount <= byteCount_t; 
+    DCOUT <= DCOUT_t; 
     OLEDByte(0) <= (OLEDByte0_t); 
     OLEDByte(1) <= (OLEDByte1_t); 
     --OLEDByte <= OLEDByteArr_t; 

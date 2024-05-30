@@ -125,7 +125,7 @@ signal LxCount : std_logic_vector(3 downto 0) := (others => '0');               
 signal ocByteCount : std_logic_vector(3 downto 0) := (others => '0');                                                       -- permanent replacement for Dummy byteCount
 signal TxCount : std_logic_vector(3 downto 0) := "1000";                                                                    -- count of bits being transmitted 
 signal byteOUT_w : std_logic_vector (N-1 downto 0) := (others => '0');                                                      -- wire byte out by buffer to IN of SPI_Tx
-signal DCIN_i : std_logic_vector(9 downto 0) := (0 => '1', others => '0');                                                  -- reg for D/C command vector for each byte to be Tx
+signal DCIN_i : std_logic_vector(9 downto 0) := (0 => '0', others => '0');                                                  -- reg for D/C command vector; stores D/C bit to be Tx'd with complementary byte (command = 0, data = 1)
 signal DCIN_w : std_logic_vector(9 downto 0) := (others => '0');                                                            -- wire for D/C commeand vect OUT by buffer to be sent by OLEDCTrl in syc with associated byte every first bit
 signal DCINDummy : std_logic_vector(9 downto 0) := (others => '0');                                                         -- place holder for internal D/C command vect 
 signal bytesIN_i : byteArr (9 downto 0) := (others => (others => '0'));                                                     -- reg for arr of bytes to be sent from source external to OLEDCtrl (i.e onSeq)
@@ -137,7 +137,7 @@ begin
     OLEDPRst_t <= OLEDPRstIN;                       
     OLEDVddc_t <= OLEDVddcIN;                       
     OLEDVbat_t <= OLEDVbatIN;                      
-    byteSel <= onOffFlag & byteFlag;                                                                                        -- will need some tweaking*; first tweak complete                
+    --byteSel <= onOffFlag & byteFlag;                                                                                        -- will need some tweaking*; first tweak complete; setting this as sync reg for now                 
     byteCountIN_i <= byteCountIN;                       
     running <= OLEDRdy;                                                                                                     -- OLEDCtrl native flag that signal whether or not OLED is on (and therefore can receive data/commands)
 
@@ -209,13 +209,12 @@ begin
 
     end process ; -- trns                   
 
-    output : process( sclkIN, rst, stt )                                                                                       -- Use start signal and 8 bit count with sclk to control dcout to OLED in tx state 0
+    output : process( sclkIN, rst, stt )                                                                                    -- Use start signal and 8 bit count with sclk to control dcout to OLED in tx state 0
     begin                   
         if (falling_edge(sclkIN)) then                  
             case( stt ) is                  
                 when rstStt =>                  
-                    byteFlag_i <= '0';                                                                                      
-                    byteSel <= (others => '0');                     
+                    byteFlag_i <= '0';                                                                                                         
                     done <= '0';                    
                     nxByte_w <= '0';                    
                     OLEDPRst_t <= '1';                  
@@ -236,7 +235,7 @@ begin
                     ocByteCount <= (others => '0');                     
                     TxCount <= "1000";                  
                     byteOUT_w <= (others => '0');                   
-                    DCIN_i <= (0 => '1', others => '0');                    
+                    DCIN_i <= (0 => '0', others => '0');                                                                    -- Default setting is fill with 0s which indicate commmands; keep this format for future reference            
                     DCIN_w <= (others => '0');                  
                     DCINDummy <= (others => '0');                   
                     bytesIN_w <= (others => (others => '0'));                   
@@ -267,25 +266,30 @@ begin
 
     end process ; -- ouitput                    
 
-    LxProc : process( clk, rst )                                                                                            -- load bytesIN into bytesIN_i; this proc allows for variable bytesIN
+    LxProc : process( clk, rst )                                                                                            -- load bytesIN into bytesIN_i; this proc allows for variable bytesIN; rdy_w can be added to this proc to ensure buffer is ready to receive; probably need to set lxCount but not decrement until rdy 
     begin                   
         -- Defaults --
         byteFlag_w <= '0'; 
+        
         if (rising_edge(clk)) then                                                                                          -- signals can only be acted on by one proc therefore two signal set in this proc must be reset in this proc
             if (stt = rstStt) then
                 byteFlag_w <= '0'; 
+                byteSel <= (others => '0');                                                                             
                 LxCount <= (others => '0'); 
                 bytesIN_i <= (others => (others => '0'));   
             else
                 if (unsigned(LxCount) = 1) then                                                                             -- Special case; when final byte loaded into bytesIN_i raise byteFlag wire to signal byteBuffer can capture
                     bytesIN_i(to_integer(unsigned(LxCount) - 1)) <= bytesIN(to_integer(unsigned(LxCount) - 1 )); 
+                    DCIN_i(to_integer(unsigned(LxCount) - 1)) <= DCIN(to_integer(unsigned(LxCount) - 1)); 
                     LxCount <= std_logic_vector(unsigned(LxCount) - 1); 
                     byteFlag_w <= '1'; 
                 elsif (unsigned(LxCount) > 0) then                                                                          -- normal loading 
                     bytesIN_i(to_integer(unsigned(LxCount) - 1)) <= bytesIN(to_integer(unsigned(LxCount) - 1 )); 
+                    DCIN_i(to_integer(unsigned(LxCount) - 1)) <= DCIN(to_integer(unsigned(LxCount) - 1)); 
                     LxCount <= std_logic_vector(unsigned(LxCount) - 1); 
                 elsif ((onOffFlag = '1') or (byteFlag = '1')) then
                     LxCount <= byteCountIN; 
+                    byteSel <= onOffFlag & byteFlag;                                                                        -- currently having byteSel act as reg that stores both onOffFlag and byteFlag current values when one of them goes high
                 end if ;
             end if ;
         end if ;
