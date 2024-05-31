@@ -108,6 +108,7 @@ begin
                     byteCount_i <= (others => '0'); 
                 when idle => 
                     TxCount <= "1000"; 
+                    TxReady_t <= '1'; 
                     if (start = '1') then                                                                       -- Once start detected, whatever is on byteIN, byCount is stored 
                         byteReg <= byteIN; 
                         byteCount_i <= byteCount; 

@@ -69,7 +69,7 @@ signal lxDone : std_logic := '0';
 signal sxFlag : std_logic := '0';   
 signal sxDone : std_logic := '0';   
 signal oneByte : std_logic := '0';                                                      -- for special case; only one byte to buffer
-signal rdy_t : std_logic := '1';                                                 
+signal rdy_t : std_logic := '0';                                                 
 signal startOUT_t : std_logic := '0'; 
 signal DCOUT_t : std_logic := '0'; 
 signal byteCountIN_i : std_logic_vector(3 downto 0) := (others => '0');                 -- Used for keeping track of bytes recieved and ensuring same amount of bytes sent (and accomponying D/C bits)
@@ -128,7 +128,7 @@ begin
                 when rstStt =>
                     lxDone <= '0'; 
                     sxDone <= '0';
-                    rdy_t <= '1'; 
+                    rdy_t <= '0'; 
                     startOUT_t <= '0'; 
                     DCOUT_t <= '0'; 
                     byteCountIN_i <= (others => '0'); 

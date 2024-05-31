@@ -115,7 +115,7 @@ signal MOSI_t : std_logic := '0';
 signal rdy_w : std_logic := '0';                        
 signal running : std_logic := '0';                  
 signal startOUT_w : std_logic := '0';                       
-signal TxReady_w : std_logic := '0';                        
+signal TxReady_w : std_logic := '1';                        
 signal TxFlag : std_logic := '0';                                                                                           -- Flag signals Tx is to occur
 signal byteCountIN_i : std_logic_vector(3 downto 0) := (others => '0');                                                     -- reg for byteCount IN (byte count received from outside module)
 signal byteCountIN_w : std_logic_vector(3 downto 0) := (others => '0');                                                     -- wire for byteCount wire; read by byteBuffer; either IN or internal byte count 
@@ -134,11 +134,12 @@ signal bytesINDummy : byteArr (9 downto 0) := (others => (others => 'Z'));      
 
 begin                       
     -- IN to signal --                      
-    OLEDPRst_t <= OLEDPRstIN;                       
-    OLEDVddc_t <= OLEDVddcIN;                       
-    OLEDVbat_t <= OLEDVbatIN;                      
+    --OLEDPRst_t <= OLEDPRstIN;          x             
+    --OLEDVddc_t <= OLEDVddcIN;          x             
+    --OLEDVbat_t <= OLEDVbatIN;          x            
     --byteSel <= onOffFlag & byteFlag;                                                                                        -- will need some tweaking*; first tweak complete; setting this as sync reg for now                 
-    byteCountIN_i <= byteCountIN;                       
+    --byteCountIN_i <= byteCountIN;      x
+    -- x => COMMENTED OUT DURING TESTING --                
     running <= OLEDRdy;                                                                                                     -- OLEDCtrl native flag that signal whether or not OLED is on (and therefore can receive data/commands)
 
     -- MUXs --                      
@@ -210,7 +211,8 @@ begin
     end process ; -- trns                   
 
     output : process( sclkIN, rst, stt )                                                                                    -- Use start signal and 8 bit count with sclk to control dcout to OLED in tx state 0
-    begin                   
+    begin           
+       
         if (falling_edge(sclkIN)) then                  
             case( stt ) is                  
                 when rstStt =>                  
@@ -294,6 +296,23 @@ begin
             end if ;
         end if ;
     end process ; -- LxProc
+
+    asyncSignals : process( rst, OLEDPRst_t, OLEDVddc_t, OLEDVbat_t, byteCountIN_i, bytesIN_w, byteCountIN_w, DCIN_w )
+    begin
+         -- IN to signal --         
+        OLEDPRst_t <= OLEDPRstIN;   
+        OLEDVddc_t <= OLEDVddcIN;                       
+        OLEDVbat_t <= OLEDVbatIN;
+        byteCountIN_i <= byteCountIN;   
+
+        -- MUXs --                      
+        bytesIN_w <= bytesIN_i when (byteSel = "10" or byteSel = "01") else bytesINDummy;                                       -- select bytes from onSeq when onSeq byteFlag goes high else select internal byte source
+        byteCountIN_w <= byteCountIN_i when (byteSel = "10" or byteSel = "01") else byteCountINDummy;                           -- same as above but for byte count 
+        DCIN_w <= DCIN_i when (byteSel = "10" or byteSel = "01") else DCINDummy;      
+        
+         -- Need to move rst's of these signals here as well (since reests sync)
+
+    end process ; -- asyncSignals
     
 
     -- Signal to OUT --

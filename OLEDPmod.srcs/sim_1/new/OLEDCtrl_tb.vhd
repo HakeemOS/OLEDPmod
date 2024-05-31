@@ -134,7 +134,27 @@ begin
 
         wait for 50ns; 
 
-        -- start with emmulating onSeq_s; 
+        -- START; emmulating onSeq_s; 
+        OLEDPRstIN <= '0'; 
+
+        wait for 40ns;                                          -- repr 4us delay;
+
+        OLEDPRstIN <= '1'; 
+
+        wait for 40ns;                                          -- repr 4us delay;
+
+        OLEDVddcIN <= '1'; 
+        OLEDVbatIN <= '1'; 
+
+        wait for 10ns;                                          -- repr stt change; 
+
+        byteCountIN <= x"1"; 
+        bytesIN(0) <= x"AF";                                    -- disp on command; DCIN needn't not be changed since D/C = 0 => command 
+        onOFfFlag <= '1'; 
+
+        wait for 200ns;                                         -- repr 200ms delay 
+        
+        OLEDRdy <= '1'; 
 
 
         wait; 
