@@ -1,4 +1,4 @@
-Running: xsim.dir/OLEDCtrl_tb_behav/xsimk.exe -simmode gui -wdb OLEDCtrl_tb_behav.wdb -simrunnum 0 -socket 61970
+Running: xsim.dir/OLEDCtrl_tb_behav/xsimk.exe -simmode gui -wdb OLEDCtrl_tb_behav.wdb -simrunnum 0 -socket 64509
 Design successfully loaded
 Design Loading Memory Usage: 6584 KB (Peak: 6584 KB)
-Design Loading CPU Usage: 15 ms
+Design Loading CPU Usage: 30 ms

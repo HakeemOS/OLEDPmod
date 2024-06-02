@@ -115,7 +115,7 @@ signal MOSI_t : std_logic := '0';
 signal rdy_w : std_logic := '0';                        
 signal running : std_logic := '0';                  
 signal startOUT_w : std_logic := '0';                       
-signal TxReady_w : std_logic := '1';                        
+signal TxReady_w : std_logic := '0';                        
 signal TxFlag : std_logic := '0';                                                                                           -- Flag signals Tx is to occur
 signal byteCountIN_i : std_logic_vector(3 downto 0) := (others => '0');                                                     -- reg for byteCount IN (byte count received from outside module)
 signal byteCountIN_w : std_logic_vector(3 downto 0) := (others => '0');                                                     -- wire for byteCount wire; read by byteBuffer; either IN or internal byte count 
@@ -134,12 +134,11 @@ signal bytesINDummy : byteArr (9 downto 0) := (others => (others => 'Z'));      
 
 begin                       
     -- IN to signal --                      
-    --OLEDPRst_t <= OLEDPRstIN;          x             
-    --OLEDVddc_t <= OLEDVddcIN;          x             
-    --OLEDVbat_t <= OLEDVbatIN;          x            
-    --byteSel <= onOffFlag & byteFlag;                                                                                        -- will need some tweaking*; first tweak complete; setting this as sync reg for now                 
-    --byteCountIN_i <= byteCountIN;      x
-    -- x => COMMENTED OUT DURING TESTING --                
+    OLEDPRst_t <= OLEDPRstIN;                       
+    OLEDVddc_t <= OLEDVddcIN;                       
+    OLEDVbat_t <= OLEDVbatIN;                     
+    --byteSel <= onOffFlag & byteFlag;                                                                                      -- will need some tweaking*; first tweak complete; setting this as sync reg for now                 
+    byteCountIN_i <= (others => '0') when (stt = rstStt) else byteCountIN;                                                  -- reset for reg controlled by sync state machine 
     running <= OLEDRdy;                                                                                                     -- OLEDCtrl native flag that signal whether or not OLED is on (and therefore can receive data/commands)
 
     -- MUXs --                      
@@ -216,32 +215,23 @@ begin
         if (falling_edge(sclkIN)) then                  
             case( stt ) is                  
                 when rstStt =>                  
-                    byteFlag_i <= '0';                                                                                                         
+                    byteFlag_i <= '0';                                                                                      -- currently redundant signal; may be removed               
                     done <= '0';                    
-                    nxByte_w <= '0';                    
-                    OLEDPRst_t <= '1';                  
-                    OLEDVddc_t <= '0';                  
-                    OLEDVbat_t <= '0';                  
+                    --nxByte_w <= '0';                                                                                      -- wire in purest sense; should not be controlled                                  
                     DCOUT_t <= '0';                 
-                    DCOUT_w <= '0';                     
-                    CS_t <= '1';                    
-                    MOSI_t <= '0';                  
-                    rdy_w <= '0';                   
-                    startOUT_w <= '0';                  
-                    TxReady_w <= '0';                   
-                    TxFlag <= '0';                  
-                    byteCountIN_i <= (others => '0');                   
-                    byteCountIN_w <= (others => '0');                   
-                    byteCountINDummy <= (others => '0');                    
-                    byteCountOUT_w <= (others => '0');                  
+                    --DCOUT_w <= '0';                                                                                       -- wire in purest sense; should not be controlled
+                    --CS_t <= '1';                                                                                          -- wire in purest sense; should not be controlled
+                    --MOSI_t <= '0';                                                                                        -- wire in purest sense; should not be controlled          
+                    --startOUT_w <= '0';                                                                                    -- wire in purest sense; should not be controlled
+                    --TxReady_w <= '0';                                                                                     -- wire in purest sense; should not be controlled
+                    TxFlag <= '0';                                                     
+                    byteCountINDummy <= (others => '0');                                                                    -- will probably be removed and placed in another process 
+                    --byteCountOUT_w <= (others => '0');                                                                    -- wire in purest sense; should not be controlled           
                     ocByteCount <= (others => '0');                     
                     TxCount <= "1000";                  
-                    byteOUT_w <= (others => '0');                   
-                    DCIN_i <= (0 => '0', others => '0');                                                                    -- Default setting is fill with 0s which indicate commmands; keep this format for future reference            
-                    DCIN_w <= (others => '0');                  
-                    DCINDummy <= (others => '0');                   
-                    bytesIN_w <= (others => (others => '0'));                   
-                    bytesINDummy <= (others => (others => 'Z'));                    
+                    --byteOUT_w <= (others => '0');                                                                         -- wire in purest sense; should not be controlled            
+                    DCINDummy <= (others => '0');                                                                           -- will probably be removed and placed in another process 
+                    bytesINDummy <= (others => (others => 'Z'));                                                            -- will probably be removed and placed in another process 
                 when idle =>                    
                     if (startOUT_w = '1') then                  
                         TxFlag <= '1';                  
@@ -270,14 +260,18 @@ begin
 
     LxProc : process( clk, rst )                                                                                            -- load bytesIN into bytesIN_i; this proc allows for variable bytesIN; rdy_w can be added to this proc to ensure buffer is ready to receive; probably need to set lxCount but not decrement until rdy 
     begin                   
-        -- Defaults --
-        byteFlag_w <= '0'; 
+        -- Sync Defaults --
+        if (rising_edge(clk)) then
+            byteFlag_w <= '0'; 
+        end if ;
+        
         
         if (rising_edge(clk)) then                                                                                          -- signals can only be acted on by one proc therefore two signal set in this proc must be reset in this proc
             if (stt = rstStt) then
                 byteFlag_w <= '0'; 
                 byteSel <= (others => '0');                                                                             
                 LxCount <= (others => '0'); 
+                DCIN_i <= (0 => '0', others => '0');                                                                    -- Default setting is fill with 0s which indicate commmands; keep this format for future reference            
                 bytesIN_i <= (others => (others => '0'));   
             else
                 if (unsigned(LxCount) = 1) then                                                                             -- Special case; when final byte loaded into bytesIN_i raise byteFlag wire to signal byteBuffer can capture
@@ -296,25 +290,7 @@ begin
             end if ;
         end if ;
     end process ; -- LxProc
-
-    asyncSignals : process( rst, OLEDPRst_t, OLEDVddc_t, OLEDVbat_t, byteCountIN_i, bytesIN_w, byteCountIN_w, DCIN_w )
-    begin
-         -- IN to signal --         
-        OLEDPRst_t <= OLEDPRstIN;   
-        OLEDVddc_t <= OLEDVddcIN;                       
-        OLEDVbat_t <= OLEDVbatIN;
-        byteCountIN_i <= byteCountIN;   
-
-        -- MUXs --                      
-        bytesIN_w <= bytesIN_i when (byteSel = "10" or byteSel = "01") else bytesINDummy;                                       -- select bytes from onSeq when onSeq byteFlag goes high else select internal byte source
-        byteCountIN_w <= byteCountIN_i when (byteSel = "10" or byteSel = "01") else byteCountINDummy;                           -- same as above but for byte count 
-        DCIN_w <= DCIN_i when (byteSel = "10" or byteSel = "01") else DCINDummy;      
-        
-         -- Need to move rst's of these signals here as well (since reests sync)
-
-    end process ; -- asyncSignals
     
-
     -- Signal to OUT --
     sclkOUT <= sclkIN; 
     OLEDPRstOUT <= OLEDPRst_t;

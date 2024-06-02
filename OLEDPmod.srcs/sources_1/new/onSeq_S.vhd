@@ -132,9 +132,11 @@ begin
     output : process( clk, stt, sw, powerOn, powerOff, running, OLEDPRst_t, OLEDVddc_t, OLEDVbat_t, OLEDByte0_t, 
                         OLEDRdy_t, delay4us, delay200ms )
     begin
-        -- Defaults --
-        byteFlag_t <= '0'; 
-
+        -- Sync Defaults --
+        if rising_edge(clk) then
+            byteFlag_t <= '0'; 
+        end if ;
+        
         case( stt ) is
             when rstStt => 
                 powerOn <= '0'; 

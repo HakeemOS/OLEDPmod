@@ -152,7 +152,11 @@ begin
         bytesIN(0) <= x"AF";                                    -- disp on command; DCIN needn't not be changed since D/C = 0 => command 
         onOFfFlag <= '1'; 
 
-        wait for 200ns;                                         -- repr 200ms delay 
+        wait for 10ns; 
+
+        onOffFlag <= '0';
+
+        wait for 190ns;                                         -- repr 200ms delay 
         
         OLEDRdy <= '1'; 
 
