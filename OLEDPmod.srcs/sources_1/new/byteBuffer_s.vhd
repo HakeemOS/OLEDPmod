@@ -119,10 +119,10 @@ begin
     output : process( clk, rst, stt)
     begin
         if (rising_edge(clk)) then
-            -- Defaults --
+            -- Sync Defaults --
             lxFlag <= '0'; 
             lxDone <= '0'; 
-            startOUT_t <= '0'; 
+            --startOUT_t <= '0'; 
 
             case( stt ) is
                 when rstStt =>
@@ -137,53 +137,56 @@ begin
                     DCIN_i <= (others => '0'); 
                     bytesIN_i <= (others => (others => '0'));
                 when idle =>
-                    rdy_t <= '1';                                                       -- rdy doesnt have to be high right at start of idle state since SPI_Tx will still be TX once buffer is idle for about 3-4 cycles
-                    if (byteFlag = '1') then
-                        byteCountIN_i <= byteCountIN;
-                        nByteCount <= to_integer(unsigned(byteCountIN));                -- load IN byteCount to integer sig
-                        lxFlag <= '1'; 
-                        if (unsigned(byteCountIN) = 1) then                             -- for special case; if only one byte in set oneByte Hi (used to flag lx state to load for 1 cycle only)
+                    rdy_t <= '1';                                                                           -- rdy doesnt have to be high right at start of idle state since SPI_Tx will still be TX once buffer is idle for about 3-4 cycles
+                    sxDone <= '0';                                                                          -- once we have sent and returned to idle all sx signals should be reset; 
+                    if (byteFlag = '1') then                    
+                        byteCountIN_i <= byteCountIN;                   
+                        nByteCount <= to_integer(unsigned(byteCountIN));                                    -- load IN byteCount to integer sig
+                        lxFlag <= '1';                  
+                        if (unsigned(byteCountIN) = 1) then                                                 -- for special case; if only one byte in set oneByte Hi (used to flag lx state to load for 1 cycle only)
                             oneByte <= '1'; 
                         end if ;
                     else
                         lxFlag <= '0'; 
                     end if ;
                 when lx =>
-                    rdy_t <= '0';                                                       -- rdy = 0 indicates buffer is loading/sending data already, cannot load more
-                    if (nByteCount = 2) then                                            -- set lxDone on second last byte load, one extra byte load occurs while lxDone is being detected by trns proc
-                        bytesIN_i(nByteCount - 1) <= bytesIN(nByteCount - 1); 
-                        DCIN_i(nByteCount - 1) <= DCIN(nByteCount - 1); 
-                        nByteCount <= nByteCount - 1; 
-                        lxDone <= '1'; 
-                    elsif (nByteCount > 1) then                                         -- normal lx of bytes and D/C bits
-                        bytesIN_i(nByteCount - 1) <= bytesIN(nByteCount - 1); 
-                        DCIN_i(nByteCount - 1) <= DCIN(nByteCount - 1); 
-                        nByteCount <= nByteCount - 1; 
-                    elsif (oneByte = '1') then                                          -- for special case; if only one byte to buffer store byte in byteArr(0) and D/C in DCIN(0) and stt trns; 
-                        oneByte <= '0'; 
-                        bytesIN_i(nByteCount - 1) <= bytesIN(nByteCount - 1); 
-                        DCIN_i(nByteCount - 1) <= DCIN(nByteCount - 1); 
-                    else                                                                -- occurs on last cycle 
+                    rdy_t <= '0';                                                                           -- rdy = 0 indicates buffer is loading/sending data already, cannot load more
+                    if (nByteCount = 2) then                                                                -- set lxDone on second last byte load, one extra byte load occurs while lxDone is being detected by trns proc
+                        bytesIN_i(nByteCount - 1) <= bytesIN(nByteCount - 1);                   
+                        DCIN_i(nByteCount - 1) <= DCIN(nByteCount - 1);                     
+                        nByteCount <= nByteCount - 1;                   
+                        lxDone <= '1';                  
+                    elsif (nByteCount > 1) then                                                             -- normal lx of bytes and D/C bits
+                        bytesIN_i(nByteCount - 1) <= bytesIN(nByteCount - 1);                   
+                        DCIN_i(nByteCount - 1) <= DCIN(nByteCount - 1);                     
+                        nByteCount <= nByteCount - 1;                   
+                    elsif (oneByte = '1') then                                                              -- for special case; if only one byte to buffer store byte in byteArr(0) and D/C in DCIN(0) and stt trns; 
+                        oneByte <= '0';                     
+                        bytesIN_i(nByteCount - 1) <= bytesIN(nByteCount - 1);                   
+                        DCIN_i(nByteCount - 1) <= DCIN(nByteCount - 1);                     
+                    else                                                                                    -- occurs on last cycle 
                         bytesIN_i(nByteCount - 1) <= bytesIN(nByteCount - 1); 
                         DCIN_i(nByteCount - 1) <= DCIN(nByteCount - 1);                                             
                         nByteCount <= to_integer(unsigned(byteCountIN_i));  
                     end if ;
                 when others =>
                     byteCountOUT_t <= byteCountIN_i; 
-                    if (sxFlag = '1' and nByteCount = 0) then                           -- last byte has been sent to SPI_Tx; sending flag => low, sending done => hi 
+                    if (sxFlag = '1' and nByteCount = 0 and startOUT_t = '0') then                          -- last byte has been sent to SPI_Tx; sending flag => low, sending done => hi; now also must know start has been detected to set sxDone 
                         sxFlag <= '0'; 
                         sxDone <= '1'; 
-                    elsif (sxFlag = '1' and nxByte = '1') then                          -- SPI signals ready for next byte 
-                        byteOUT_t <= bytesIN_i(nByteCount - 1); 
-                        DCOUT_t <= DCIN_i(nByteCount - 1); 
-                        nByteCount <= nByteCount - 1;                                   -- dec index used for selecting byte to send in byteArr
-                    elsif (TxReady = '1' and sxFlag = '0') then                         -- to start sending signal, put byteOUT and associated D/C signal on busses, send start signal to SPI_Tx Module; this should become an elsif i believe 
-                        byteOUT_t <= bytesIN_i(nByteCount - 1); 
-                        DCOUT_t <= DCIN_i(nByteCount - 1); 
-                        startOUT_t <= '1'; 
-                        sxFlag <= '1'; 
-                        nByteCount <= nByteCount - 1;                                   -- dec index used for selecting byte to send in byteArr
-                    else                                                                -- waiting for SPI_Tx to be ready
+                    elsif (TxReady = '0' and startOUT_t = '1') then                                         -- must ensure startOUT has been detected before pulling down, esp since this will operate on faster clk than SPI_Tx
+                        startOUT_t <= '0'; 
+                    elsif (sxFlag = '1' and nxByte = '1') then                                              -- SPI signals ready for next byte 
+                        byteOUT_t <= bytesIN_i(nByteCount - 1);                     
+                        DCOUT_t <= DCIN_i(nByteCount - 1);                  
+                        nByteCount <= nByteCount - 1;                                                       -- dec index used for selecting byte to send in byteArr
+                    elsif (TxReady = '1' and sxFlag = '0') then                                             -- to start sending signal, put byteOUT and associated D/C signal on busses, send start signal to SPI_Tx Module; this should become an elsif i believe 
+                        byteOUT_t <= bytesIN_i(nByteCount - 1);                     
+                        DCOUT_t <= DCIN_i(nByteCount - 1);                  
+                        startOUT_t <= '1';                  
+                        sxFlag <= '1';                  
+                        nByteCount <= nByteCount - 1;                                                       -- dec index used for selecting byte to send in byteArr
+                    else                                                                                    -- waiting for SPI_Tx to be ready
                         null; 
                     end if ;
             end case ;

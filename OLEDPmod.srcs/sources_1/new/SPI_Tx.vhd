@@ -91,7 +91,7 @@ begin
     output : process( clk, rst, stt, start, done, TxCount, byteCount_i )
     begin
         if (falling_edge(clk)) then
-            -- Defaults --
+            -- Sync Defaults --
             done <= '0'; 
             nxByte_t <= '0';
             lBit <= '0'; 

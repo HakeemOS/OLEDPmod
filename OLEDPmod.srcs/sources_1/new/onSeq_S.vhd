@@ -190,7 +190,7 @@ begin
                 byteFlag_t <= '1'; 
             when s3 => 
                 if (rising_edge(clk)) then
-                    if (delay200ms = c_Delay200ms) then
+                    if (delay200ms = c_Delay200ms) then                                                     -- Once delay is finished we can signal to OLEDCtrl OLED is rdy to be used
                         OLEDRdy_t <= '1';
                         delay200ms <= (others => '0' ) ;    
                         powerOn <= '0';                                    
