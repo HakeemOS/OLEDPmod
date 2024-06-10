@@ -53,9 +53,9 @@ entity OLEDCtrl_s is
             CS : out std_logic;          
             DCOUT : out std_logic;
             MOSI : out std_logic;                   
-            OLEDPRstOUT : out std_logic;                        
-            OLEDVddcOUT : out std_logic;                        
-            OLEDVbatOUT : out std_logic                               
+            OLEDPRstOUT : out std_logic;   
+            OLEDVbatOUT : out std_logic;                       
+            OLEDVddcOUT : out std_logic                      
     );                      
 end OLEDCtrl_s;                     
 
