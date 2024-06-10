@@ -40,12 +40,12 @@ entity onSeq_S is
     port (  clk : in std_logic; 
             rst : in std_logic;
             sw : in std_logic; 
-            OLEDPRst : out std_logic; 
-            OLEDVddc : out std_logic; 
-            OLEDVbat : out std_logic; 
-            OLEDRdy : out std_logic;                                                                        -- signals to OLEDCtrl On/OFF seq complete 
             byteFlag : out std_logic; 
             DCOUT : out std_logic_vector;                                                                   -- vector of D/C bits following same index as array of bytes (i.e corresponding D/C bit of byte at pos 1 also at pos 1 of vector)
+            OLEDPRst : out std_logic; 
+            OLEDRdy : out std_logic;                                                                        -- signals to OLEDCtrl On/OFF seq complete 
+            OLEDVbat : out std_logic;
+            OLEDVddc : out std_logic; 
             byteCount : out std_logic_vector(3 downto 0); 
             OLEDByte : out byteArr
     );
@@ -63,9 +63,9 @@ signal powerOn : std_logic := '0';
 signal powerOff : std_logic := '0'; 
 signal running : std_logic := '0'; 
 signal OLEDPRst_t : std_logic := '1';
-signal OLEDVddc_t : std_logic := '0'; 
+signal OLEDRdy_t : std_logic := '0';
 signal OLEDVbat_t : std_logic := '0'; 
-signal OLEDRdy_t : std_logic := '0'; 
+signal OLEDVddc_t : std_logic := '0';  
 signal byteFlag_t : std_logic := '0';
 signal byteCount_t : std_logic_vector (3 downto 0) := (others => '0'); 
 signal DCOUT_t : std_logic_vector(3 downto 0) := (others => '0');                                           -- length 4 vector limits number of D/C bits and therefore bytes OUT by this module to 4 
@@ -75,9 +75,8 @@ signal OLEDByte1_t : std_logic_vector(N-1 downto 0) := (others => '0');         
 signal delay4us : std_logic_vector(11 downto 0) := (others => '0');      
 signal delay200ms : std_logic_vector(27 downto 0) := (others => '0');   
 
-
-
 begin
+    -- Processes -- 
     trns : process( clk, rst, sw, stt, powerOn, powerOff, running, OLEDPRst_t, OLEDVddc_t, OLEDVbat_t, OLEDByte0_t, 
                     OLEDRdy_t  )
     begin
@@ -221,16 +220,16 @@ begin
         end case ;
     end process ; -- output
 
-
     -- Signals to OUT -- 
-    OLEDPRst <= OLEDPRst_t; 
-    OLEDVddc <= OLEDVddc_t; 
-    OLEDVbat <= OLEDVbat_t;
-    OLEDRdy <= OLEDRdy_t; 
     byteFlag <= byteFlag_t; 
-    byteCount <= byteCount_t; 
     DCOUT <= DCOUT_t; 
+    OLEDPRst <= OLEDPRst_t;
+    OLEDRdy <= OLEDRdy_t; 
+    OLEDVbat <= OLEDVbat_t;
+    OLEDVddc <= OLEDVddc_t; 
+    byteCount <= byteCount_t; 
     OLEDByte(0) <= (OLEDByte0_t); 
     OLEDByte(1) <= (OLEDByte1_t); 
     --OLEDByte <= OLEDByteArr_t; 
+
 end Behavioral;

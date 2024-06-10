@@ -81,8 +81,8 @@ signal byteOUT_t : std_logic_vector(N-1 downto 0) := (others => '0');
 signal DCIN_i : std_logic_vector(9 downto 0) := (others => '0');                        -- since default max bytes stored is 10, 10 bit vector to store each of the accompanying D/C bits 
 signal bytesIN_i : byteArr(9 downto 0) := (others => (others => '0'));                 -- For now default max number of bytes stored is 10; 
 
-
 begin
+    -- Processes -- 
     trns : process( clk, rst, stt )
     begin
         if (rising_edge(clk)) then

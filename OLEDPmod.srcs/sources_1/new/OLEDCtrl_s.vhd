@@ -40,10 +40,10 @@ entity OLEDCtrl_s is
     port (  clk : in std_logic;                     
             sclkIN : in std_logic;                  
             rst : in std_logic;                     
-            OLEDPRstIN : in std_logic;                                                                              
-            OLEDVddcIN : in std_logic;                  
-            OLEDVbatIN : in std_logic;                  
+            OLEDPRstIN : in std_logic; 
             OLEDRdy : in std_logic;                                                                                         -- OLED can be used, onSeq is completed (when HI); OLED not available (when LOW)
+            OLEDVbatIN : in std_logic;                                                                               
+            OLEDVddcIN : in std_logic;                  
             byteFlag : in std_logic;                            
             onOffFlag : in std_logic;                                                                                       -- onSeq byteFlag bit connected to this IN so CTRL knows ON/OFF command incoming    
             DCIN : in std_logic_vector;                             
@@ -102,15 +102,15 @@ signal stt : state := idle;
 signal byteFlag_i : std_logic := '0';                                                                                       -- might delete; currently redundant                                                                    
 signal byteFlag_w : std_logic := '0';                       
 signal byteSel : std_logic_vector(1 downto 0) := (others => '0');                                                           -- used as sel vector for mux controlling IN bus; comprised of onOffFlag and byteFlag IN
-signal done : std_logic := '0';                         
-signal nxByte_w : std_logic := '0';                         
-signal OLEDPRst_t : std_logic := '1';                       
-signal OLEDVddc_t : std_logic := '0';                       
-signal OLEDVbat_t : std_logic := '0';                       
+signal CS_t : std_logic := '1';                                            
 signal DCOUT_t : std_logic := '0';                      
-signal DCOUT_w : std_logic := '0';                      
-signal CS_t : std_logic := '1';                         
+signal DCOUT_w : std_logic := '0'; 
+signal done : std_logic := '0';  
 signal MOSI_t : std_logic := '0';                       
+signal nxByte_w : std_logic := '0';                         
+signal OLEDPRst_t : std_logic := '1'; 
+signal OLEDVbat_t : std_logic := '0';                      
+signal OLEDVddc_t : std_logic := '0';                                                    
 signal rdy_w : std_logic := '0';                        
 signal running : std_logic := '0';                  
 signal startOUT_w : std_logic := '0';                       
@@ -133,9 +133,9 @@ signal bytesINDummy : byteArr (9 downto 0) := (others => (others => 'Z'));      
 
 begin                       
     -- IN to signal --                      
-    OLEDPRst_t <= OLEDPRstIN;                       
+    OLEDPRst_t <= OLEDPRstIN; 
+    OLEDVbat_t <= OLEDVbatIN;                         
     OLEDVddc_t <= OLEDVddcIN;                       
-    OLEDVbat_t <= OLEDVbatIN;                     
     byteCountIN_i <= (others => '0') when (stt = rstStt) else byteCountIN;                                                  -- reset for reg controlled by sync state machine 
     running <= OLEDRdy;                                                                                                     -- OLEDCtrl native flag that signal whether or not OLED is on (and therefore can receive data/commands)
 
@@ -183,7 +183,6 @@ begin
     );              
     
     -- Processes -- 
-
     trns : process( clk, rst, stt )                 
     begin                   
         if (rising_edge(clk)) then                  
@@ -212,7 +211,6 @@ begin
 
     output : process( sclkIN, rst, stt )                                                                                    -- Use start signal and 8 bit count with sclk to control dcout to OLED in tx state 0
     begin           
-       
         if (falling_edge(sclkIN)) then                  
             case( stt ) is                  
                 when rstStt =>                  
@@ -258,8 +256,7 @@ begin
         if (rising_edge(clk)) then
             byteFlag_w <= '0'; 
         end if ;
-        
-        
+
         if (rising_edge(clk)) then                                                                                          -- signals can only be acted on by one proc therefore two signal set in this proc must be reset in this proc
             if (stt = rstStt) then
                 byteFlag_w <= '0'; 
@@ -286,14 +283,12 @@ begin
     end process ; -- LxProc
     
     -- Signal to OUT --
-    sclkOUT <= sclkIN; 
-    OLEDPRstOUT <= OLEDPRst_t;
-    OLEDVddcOUT <= OLEDVddc_t; 
-    OLEDVbatOUT <= OLEDVbat_t; 
-    DCOUT <= DCOUT_t; 
     CS <= CS_t; 
+    DCOUT <= DCOUT_t; 
     MOSI <= MOSI_t; 
-
-
+    OLEDPRstOUT <= OLEDPRst_t;
+    OLEDVbatOUT <= OLEDVbat_t; 
+    OLEDVddcOUT <= OLEDVddc_t; 
+    sclkOUT <= sclkIN; 
 
 end Behavioral;

@@ -63,6 +63,7 @@ signal byteReg : std_logic_vector(N-1 downto 0) := (others => '0');             
 signal byteCount_i : std_logic_vector(3 downto 0) := (others => '0');                                   -- store number of bytes to be Tx'd successively  
 
 begin
+    -- Processes -- 
     trns : process( clk, rst, stt, done, TxReady_t )
     begin
         if (rising_edge(clk)) then

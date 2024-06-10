@@ -45,8 +45,8 @@ signal clk_7p1MHz_t : std_logic := '0';
 signal counter : std_logic_vector(3 downto 0) := (others => '0'); 
 signal tickCount : std_logic_vector(3 downto 0) := x"6";                    
 
-
 begin
+    -- Process --  
     proc1 : process( clk, rst )
     begin
         if (rising_edge(clk)) then
@@ -61,6 +61,7 @@ begin
         end if ;
     end process ; -- proc1
 
+    -- Signal to OUT -- 
     clk_7p1MHz <= clk_7p1MHz_t; 
 
 end Behavioral;
