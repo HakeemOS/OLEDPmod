@@ -94,12 +94,11 @@ component SPI_Tx is
             TxReady : out std_logic                     
     );                      
 end component;                      
-
-    -- Constants --                     
+                 
     -- State Initialization --                          
 type state is (rstStt, idle, tx);                       
 signal stt : state := idle;                         
-    -- Signals --                                                                                                           -- for signals; i => inReg, w => wire, t => tempReg (for out)
+    -- Signals --                                                                                                           -- for signals; i => inReg, w => wire, t => tempReg (for out); all signals that function as "pure" wires are not to be rst as they are rst by component driving them
 signal byteFlag_i : std_logic := '0';                                                                                       -- might delete; currently redundant                                                                    
 signal byteFlag_w : std_logic := '0';                       
 signal byteSel : std_logic_vector(1 downto 0) := (others => '0');                                                           -- used as sel vector for mux controlling IN bus; comprised of onOffFlag and byteFlag IN
@@ -137,7 +136,6 @@ begin
     OLEDPRst_t <= OLEDPRstIN;                       
     OLEDVddc_t <= OLEDVddcIN;                       
     OLEDVbat_t <= OLEDVbatIN;                     
-    --byteSel <= onOffFlag & byteFlag;                                                                                      -- will need some tweaking*; first tweak complete; setting this as sync reg for now                 
     byteCountIN_i <= (others => '0') when (stt = rstStt) else byteCountIN;                                                  -- reset for reg controlled by sync state machine 
     running <= OLEDRdy;                                                                                                     -- OLEDCtrl native flag that signal whether or not OLED is on (and therefore can receive data/commands)
 
@@ -216,20 +214,12 @@ begin
             case( stt ) is                  
                 when rstStt =>                  
                     byteFlag_i <= '0';                                                                                      -- currently redundant signal; may be removed               
-                    done <= '0';                    
-                    --nxByte_w <= '0';                                                                                      -- wire in purest sense; should not be controlled                                  
+                    done <= '0';                                                    
                     DCOUT_t <= '0';                 
-                    --DCOUT_w <= '0';                                                                                       -- wire in purest sense; should not be controlled
-                    --CS_t <= '1';                                                                                          -- wire in purest sense; should not be controlled
-                    --MOSI_t <= '0';                                                                                        -- wire in purest sense; should not be controlled          
-                    --startOUT_w <= '0';                                                                                    -- wire in purest sense; should not be controlled
-                    --TxReady_w <= '0';                                                                                     -- wire in purest sense; should not be controlled
                     TxFlag <= '0';                                                     
-                    byteCountINDummy <= (others => '0');                                                                    -- will probably be removed and placed in another process 
-                    --byteCountOUT_w <= (others => '0');                                                                    -- wire in purest sense; should not be controlled           
+                    byteCountINDummy <= (others => '0');                                                                    -- will probably be removed and placed in another process           
                     ocByteCount <= (others => '0');                     
-                    TxCount <= "1000";                  
-                    --byteOUT_w <= (others => '0');                                                                         -- wire in purest sense; should not be controlled            
+                    TxCount <= "1000";                         
                     DCINDummy <= (others => '0');                                                                           -- will probably be removed and placed in another process 
                     bytesINDummy <= (others => (others => 'Z'));                                                            -- will probably be removed and placed in another process 
                 when idle =>                    
