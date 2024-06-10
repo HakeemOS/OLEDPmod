@@ -144,6 +144,7 @@ begin
     byteCountIN_w <= byteCountIN_i when (byteSel = "10" or byteSel = "01") else byteCountINDummy;                           -- same as above but for byte count 
     DCIN_w <= DCIN_i when (byteSel = "10" or byteSel = "01") else DCINDummy;                                                -- same as above but for D/C vector; DCIN+i initialized to what onSeq default is, when reset or after used by another potential module, returns to default of LSB = '1'
 
+    -- Component Instances -- 
     BB0 : byteBuffer_s                  
     generic map (                   
         N => 8                      
@@ -179,7 +180,9 @@ begin
             CS => CS_t,                     
             nxByte => nxByte_w,                     
             TxReady => TxReady_w                    
-    );                  
+    );              
+    
+    -- Processes -- 
 
     trns : process( clk, rst, stt )                 
     begin                   
