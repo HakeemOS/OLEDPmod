@@ -64,8 +64,11 @@ type state is (rstStt, idle, lx, sx);                                           
 signal stt : state := idle;  
     -- Signals --
 signal nByteCount : integer range 0 to MaxBytes := 0;                                   -- byteCount Index as integer; n indicates integer; nl is natural  
+signal leadED : std_logic := '0';                                                       -- used for nxByte edge detect;
+signal followED : std_logic := '0';                                                     -- used for nxByte edge detect;  
 signal lxFlag : std_logic := '0'; 
 signal lxDone : std_logic := '0';   
+signal nxByteED : std_logic := '0';                                                     -- nxByte edge Detect; since SPI is running on slower clock nxByte signal used to sx next byte onto bus can be triggered over and by same nxByte signal, edge detect signal to prevent this 
 signal sxFlag : std_logic := '0';   
 signal sxDone : std_logic := '0';   
 signal oneByte : std_logic := '0';                                                      -- for special case; only one byte to buffer
@@ -176,11 +179,11 @@ begin
                         sxDone <= '1'; 
                     elsif (TxReady = '0' and startOUT_t = '1') then                                         -- must ensure startOUT has been detected before pulling down, esp since this will operate on faster clk than SPI_Tx
                         startOUT_t <= '0'; 
-                    elsif (sxFlag = '1' and nxByte = '1') then                                              -- SPI signals ready for next byte 
+                    elsif (sxFlag = '1' and nxByteED = '1' ) then                      -- SPI signals ready for next byte; detect prevent  
                         byteOUT_t <= bytesIN_i(nByteCount - 1);                     
                         DCOUT_t <= DCIN_i(nByteCount - 1);                  
                         nByteCount <= nByteCount - 1;                                                       -- dec index used for selecting byte to send in byteArr
-                    elsif (TxReady = '1' and sxFlag = '0') then                                             -- to start sending signal, put byteOUT and associated D/C signal on busses, send start signal to SPI_Tx Module; this should become an elsif i believe 
+                    elsif (TxReady = '1' and sxFlag = '0') then                                             -- to start sending signal, put byteOUT and associated D/C signal on busses, send start signal to SPI_Tx Module; only start once SPI_Tx is ready
                         byteOUT_t <= bytesIN_i(nByteCount - 1);                     
                         DCOUT_t <= DCIN_i(nByteCount - 1);                  
                         startOUT_t <= '1';                  
@@ -189,6 +192,9 @@ begin
                     else                                                                                    -- waiting for SPI_Tx to be ready
                         null; 
                     end if ;
+                    leadED <= nxByte;                                                                       -- nxByte edge detect implementation; 
+                    followED <= leadED;     
+                    nxByteED <= leadED and (not followED); 
             end case ;
         end if ;
     end process ; -- output

@@ -239,7 +239,8 @@ begin
                     else                    
                         TxFlag <= '0';                  
                     end if ;                    
-                when others =>                  
+                when others =>   
+                    TxFlag <= '0';                                                                                          -- Lower Tx Flag once Tx state reached                
                     if (unsigned(ocByteCount) = 0) then                                                                     -- as soon as last D/C bit Tx'd, move to idle state 
                         done <= '1';                                
                     else                        

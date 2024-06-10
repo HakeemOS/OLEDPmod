@@ -32,7 +32,12 @@ use IEEE.STD_LOGIC_1164.ALL;
 --use UNISIM.VComponents.all;
 
 entity Top_s is
---  Port ( );
+    port (  clk : in std_logic;
+            rst : in std_logic; 
+            sw : in std_logic; 
+            -- ports to OLED --   
+
+    );
 end Top_s;
 
 architecture Structural of Top_s is

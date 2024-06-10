@@ -149,16 +149,24 @@ begin
         wait for 10ns;                                          -- repr stt change; 
 
         -- test 1; for 1 byte being sent -- 
-        byteCountIN <= x"1";
-        DCIN <= x"1";                                           -- for command D/C = 0, but for debugging easier to see if working correct when D/C = 1; 
-        bytesIN(0) <= x"AE";                                    -- disp off command; DCIN needn't not be changed since D/C = 0 => command; using off command since easier to debug with 
+        --byteCountIN <= x"1";
+        --DCIN <= x"1";                                           -- for command D/C = 0, but for debugging easier to see if working correct when D/C = 1; 
+        --bytesIN(0) <= x"AE";                                    -- disp off command; DCIN needn't not be changed since D/C = 0 => command; using off command since easier to debug with 
         onOFfFlag <= '1'; 
 
         -- test 2; for 3 bytes being sent -- 
+        byteCountIN <= x"3"; 
+        DCIN <= x"5"; 
+        bytesIN <= (x"00", x"AF", x"36", x"9C"); 
+        --byteFlag <= '1'; 
 
         wait for 10ns; 
 
+        -- Test 1; turn off onOffFlag
         onOffFlag <= '0';
+
+        --Test 2; turn off byteFlag
+        --byteFlag <= '0'; 
 
         wait for 240ns;                                         -- repr 200ms delay; scaled currently to when first byte finished sending
         
