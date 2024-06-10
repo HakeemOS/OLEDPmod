@@ -39,8 +39,8 @@ entity SPI_Tx is
             start : in std_logic; 
             byteCount : in std_logic_vector(3 downto 0);
             byteIN : in std_logic_vector(N-1 downto 0); 
-            MOSI : out std_logic; 
             CS : out std_logic; 
+            MOSI : out std_logic;
             nxByte : out std_logic; 
             TxReady : out std_logic
         );
@@ -149,8 +149,8 @@ begin
     end process ; -- output
 
     -- Signal to OUTs -- 
-    MOSI <= MOSI_t; 
     CS <= CS_t;
+    MOSI <= MOSI_t; 
     nxByte <= nxByte_t; 
     TxReady <= TxReady_t; 
 

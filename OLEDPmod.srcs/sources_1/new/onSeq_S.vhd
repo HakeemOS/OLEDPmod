@@ -41,11 +41,11 @@ entity onSeq_S is
             rst : in std_logic;
             sw : in std_logic; 
             byteFlag : out std_logic; 
-            DCOUT : out std_logic_vector;                                                                   -- vector of D/C bits following same index as array of bytes (i.e corresponding D/C bit of byte at pos 1 also at pos 1 of vector)
             OLEDPRst : out std_logic; 
             OLEDRdy : out std_logic;                                                                        -- signals to OLEDCtrl On/OFF seq complete 
             OLEDVbat : out std_logic;
             OLEDVddc : out std_logic; 
+            DCOUT : out std_logic_vector;                                                                   -- vector of D/C bits following same index as array of bytes (i.e corresponding D/C bit of byte at pos 1 also at pos 1 of vector)
             byteCount : out std_logic_vector(3 downto 0); 
             OLEDByte : out byteArr
     );
@@ -222,11 +222,11 @@ begin
 
     -- Signals to OUT -- 
     byteFlag <= byteFlag_t; 
-    DCOUT <= DCOUT_t; 
     OLEDPRst <= OLEDPRst_t;
     OLEDRdy <= OLEDRdy_t; 
     OLEDVbat <= OLEDVbat_t;
     OLEDVddc <= OLEDVddc_t; 
+    DCOUT <= DCOUT_t; 
     byteCount <= byteCount_t; 
     OLEDByte(0) <= (OLEDByte0_t); 
     OLEDByte(1) <= (OLEDByte1_t); 

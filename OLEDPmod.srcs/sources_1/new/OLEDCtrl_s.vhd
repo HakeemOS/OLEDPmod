@@ -39,23 +39,23 @@ entity OLEDCtrl_s is
     generic (N : integer := 8);                     
     port (  clk : in std_logic;                     
             sclkIN : in std_logic;                  
-            rst : in std_logic;                     
+            rst : in std_logic;     
+            byteFlag : in std_logic;                 
             OLEDPRstIN : in std_logic; 
             OLEDRdy : in std_logic;                                                                                         -- OLED can be used, onSeq is completed (when HI); OLED not available (when LOW)
             OLEDVbatIN : in std_logic;                                                                               
-            OLEDVddcIN : in std_logic;                  
-            byteFlag : in std_logic;                            
+            OLEDVddcIN : in std_logic;                                             
             onOffFlag : in std_logic;                                                                                       -- onSeq byteFlag bit connected to this IN so CTRL knows ON/OFF command incoming    
             DCIN : in std_logic_vector;                             
             byteCountIN : in std_logic_vector(3 downto 0);                                                                  -- number of bytes to Tx
             bytesIN : in byteArr;                                                                                           -- byte(s) to be Tx 
-            sclkOUT : out std_logic;                        
+            sclkOUT : out std_logic;   
+            CS : out std_logic;          
+            DCOUT : out std_logic;
+            MOSI : out std_logic;                   
             OLEDPRstOUT : out std_logic;                        
             OLEDVddcOUT : out std_logic;                        
-            OLEDVbatOUT : out std_logic;                        
-            DCOUT : out std_logic;                      
-            CS : out std_logic;                         
-            MOSI : out std_logic                        
+            OLEDVbatOUT : out std_logic                               
     );                      
 end OLEDCtrl_s;                     
 
@@ -136,8 +136,8 @@ begin
     OLEDPRst_t <= OLEDPRstIN; 
     OLEDVbat_t <= OLEDVbatIN;                         
     OLEDVddc_t <= OLEDVddcIN;                       
-    byteCountIN_i <= (others => '0') when (stt = rstStt) else byteCountIN;                                                  -- reset for reg controlled by sync state machine 
     running <= OLEDRdy;                                                                                                     -- OLEDCtrl native flag that signal whether or not OLED is on (and therefore can receive data/commands)
+    byteCountIN_i <= (others => '0') when (stt = rstStt) else byteCountIN;                                                  -- reset for reg controlled by sync state machine 
 
     -- MUXs --                      
     bytesIN_w <= bytesIN_i when (byteSel = "10" or byteSel = "01") else bytesINDummy;                                       -- select bytes from onSeq when onSeq byteFlag goes high else select internal byte source
@@ -158,10 +158,10 @@ begin
         nxByte => nxByte_w,                     
         byteCountIN => byteCountIN_w,                   
         DCIN => DCIN_w,                     
-        bytesIN => bytesIN_w,                   
+        bytesIN => bytesIN_w,                
+        DCOUT => DCOUT_w, 
         rdy => rdy_w,                   
-        startOUT => startOUT_w,                 
-        DCOUT => DCOUT_w,                   
+        startOUT => startOUT_w,                                   
         byteCountOUT => byteCountOUT_w,                     
         byteOUT => byteOUT_w                    
     );                  
@@ -175,9 +175,9 @@ begin
             rst => rst,                     
             start => startOUT_w,                    
             byteCount => byteCountOUT_w,                    
-            byteIN => byteOUT_w,                    
-            MOSI => MOSI_t,                 
-            CS => CS_t,                     
+            byteIN => byteOUT_w,            
+            CS => CS_t,         
+            MOSI => MOSI_t,                                     
             nxByte => nxByte_w,                     
             TxReady => TxReady_w                    
     );              
@@ -283,12 +283,12 @@ begin
     end process ; -- LxProc
     
     -- Signal to OUT --
+    sclkOUT <= sclkIN; 
     CS <= CS_t; 
     DCOUT <= DCOUT_t; 
     MOSI <= MOSI_t; 
     OLEDPRstOUT <= OLEDPRst_t;
     OLEDVbatOUT <= OLEDVbat_t; 
     OLEDVddcOUT <= OLEDVddc_t; 
-    sclkOUT <= sclkIN; 
 
 end Behavioral;

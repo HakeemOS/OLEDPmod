@@ -46,9 +46,9 @@ entity byteBuffer_s is
             byteCountIN : in std_logic_vector(3 downto 0);                              -- number of bytes to Tx 
             DCIN : in std_logic_vector;                                                 -- all data/command bits for each byte In
             bytesIN : in byteArr;                                                       -- all bytes to be Tx by SPI_Tx for specific command or data 
+            DCOUT: out std_logic;                                                       -- current data/command bit to be Tx
             rdy : out std_logic;                                                        -- flag for other modules to see buffer can receive 
             startOUT : out std_logic;                                                   -- start signal sent to SPI_Tx
-            DCOUT: out std_logic;                                                       -- current data/command bit to be Tx
             byteCountOUT : out std_logic_vector(3 downto 0); 
             byteOUT : out std_logic_vector(N-1 downto 0)                                -- current byte to be Tx
     );
@@ -200,9 +200,9 @@ begin
     end process ; -- output
 
     -- Signal to OUTs --
+    DCOUT <= DCOUT_t; 
     rdy <= rdy_t; 
     startOUT <= startOUT_t; 
-    DCOUT <= DCOUT_t; 
     byteCountOUT <= byteCountOUT_t; 
     byteOUT <= byteOUT_t; 
 
