@@ -2,3 +2,6 @@ Running: xsim.dir/OLEDCtrl_tb_behav/xsimk.exe -simmode gui -wdb OLEDCtrl_tb_beha
 Design successfully loaded
 Design Loading Memory Usage: 6584 KB (Peak: 6584 KB)
 Design Loading CPU Usage: 31 ms
+Simulation completed
+Simulation Memory Usage: 7276 KB (Peak: 7276 KB)
+Simulation CPU Usage: 171 ms
