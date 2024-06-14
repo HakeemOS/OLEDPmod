@@ -132,9 +132,9 @@ begin
                         OLEDRdy_t, delay4us, delay200ms )
     begin
         -- Sync Defaults --
-        if rising_edge(clk) then
-            byteFlag_t <= '0'; 
-        end if ;
+        --if rising_edge(clk) then
+        --    byteFlag_t <= '0'; 
+        --end if ;
         
         case( stt ) is
             when rstStt => 
@@ -189,6 +189,7 @@ begin
                 byteFlag_t <= '1'; 
             when s3 => 
                 if (rising_edge(clk)) then
+                    byteFlag_t <= '0';                                                                      -- Wasn't able to use sync default val for this specific reg, this is fix 
                     if (delay200ms = c_Delay200ms) then                                                     -- Once delay is finished we can signal to OLEDCtrl OLED is rdy to be used
                         OLEDRdy_t <= '1';
                         delay200ms <= (others => '0' ) ;    
@@ -207,6 +208,7 @@ begin
                 OLEDVddc_t <= '0'; 
                 OLEDVbat_t <= '0'; 
             when others =>
+                byteFlag_t <= '0';                                                                          -- Wasn't able to use sync default val for this specific reg, this is fix 
                 if (rising_edge(clk)) then
                     if (delay200ms = c_Delay200ms) then
                         OLEDRdy_t <= '0';

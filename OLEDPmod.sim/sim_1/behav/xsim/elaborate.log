@@ -1,6 +1,6 @@
 Vivado Simulator 2020.2
 Copyright 1986-1999, 2001-2020 Xilinx, Inc. All Rights Reserved.
-Running: C:/Xilinx/Vivado/2020.2/bin/unwrapped/win64.o/xelab.exe -wto 3f89ebdd59194e6a907141978da3c8c3 --incr --debug typical --relax --mt 2 -L xil_defaultlib -L myLib -L secureip --snapshot OLEDCtrl_tb_behav xil_defaultlib.OLEDCtrl_tb -log elaborate.log 
+Running: C:/Xilinx/Vivado/2020.2/bin/unwrapped/win64.o/xelab.exe -wto 3f89ebdd59194e6a907141978da3c8c3 --incr --debug typical --relax --mt 2 -L xil_defaultlib -L myLib -L secureip --snapshot Top_tb_behav xil_defaultlib.Top_tb -log elaborate.log 
 Using 2 slave threads.
 Starting static elaboration
 Completed static elaboration
@@ -10,10 +10,13 @@ Time Resolution for simulation is 1ps
 Compiling package std.standard
 Compiling package std.textio
 Compiling package ieee.std_logic_1164
-Compiling package mylib.types_p
 Compiling package ieee.numeric_std
+Compiling package mylib.types_p
 Compiling architecture behavioral of entity xil_defaultlib.byteBuffer_s [\byteBuffer_s(9,0)(9,0)(7,0)\]
 Compiling architecture behavioral of entity xil_defaultlib.SPI_Tx [spi_tx_default]
-Compiling architecture behavioral of entity xil_defaultlib.OLEDCtrl_s [\OLEDCtrl_s(3,0)(3,0)(7,0)\]
-Compiling architecture behavioral of entity xil_defaultlib.oledctrl_tb
-Built simulation snapshot OLEDCtrl_tb_behav
+Compiling architecture behavioral of entity xil_defaultlib.OLEDCtrl_s [\OLEDCtrl_s(3,0)(9,0)(7,0)\]
+Compiling architecture behavioral of entity xil_defaultlib.onSeq_S [\onSeq_S(3,0)(9,0)(7,0)\]
+Compiling architecture behavioral of entity xil_defaultlib.sclk_s [sclk_s_default]
+Compiling architecture structural of entity xil_defaultlib.Top_s [top_s_default]
+Compiling architecture behavioral of entity xil_defaultlib.top_tb
+Built simulation snapshot Top_tb_behav

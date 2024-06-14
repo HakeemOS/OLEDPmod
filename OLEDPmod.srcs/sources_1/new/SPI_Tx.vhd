@@ -57,7 +57,7 @@ signal lBit : std_logic := '0';                                                 
 signal MOSI_t : std_logic := '0';                                                                       -- Bit being Tx
 signal CS_t : std_logic := '1';                                                                         -- Chip select 
 signal nxByte_t : std_logic := '0';                                                                     -- signals to buffer to load next byte (If any)
-signal TxReady_t : std_logic := '0';                                                                    -- Ready to Tx signal 
+signal TxReady_t : std_logic := '1';                                                                    -- Ready to Tx signal; must start at 1;  
 signal TxCount : std_logic_vector(3 downto 0) := "1000";                                                -- keeps track of which bit in byte has been tx
 signal byteReg : std_logic_vector(N-1 downto 0) := (others => '0');                                     -- stores the byte being currently sent; rec'd from byte reg 
 signal byteCount_i : std_logic_vector(3 downto 0) := (others => '0');                                   -- store number of bytes to be Tx'd successively  

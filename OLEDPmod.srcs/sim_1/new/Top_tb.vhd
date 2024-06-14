@@ -92,7 +92,19 @@ begin
     -- Stimulus -- 
     stim : process 
     begin
-        
+        rst <= '0'; 
+        sw <= '0'; 
+
+        wait for 100ns; 
+
+        sw <= '1'; 
+
+        wait for 255ms; 
+
+        sw <= '0'; 
+
+        wait; 
+
     end process ; -- stim
 
 end Behavioral;

@@ -179,7 +179,7 @@ begin
                         sxDone <= '1'; 
                     elsif (TxReady = '0' and startOUT_t = '1') then                                         -- must ensure startOUT has been detected before pulling down, esp since this will operate on faster clk than SPI_Tx
                         startOUT_t <= '0'; 
-                    elsif (sxFlag = '1' and nxByteED = '1' ) then                      -- SPI signals ready for next byte; detect prevent  
+                    elsif (sxFlag = '1' and nxByteED = '1' ) then                                           -- SPI signals ready for next byte; detect prevent  
                         byteOUT_t <= bytesIN_i(nByteCount - 1);                     
                         DCOUT_t <= DCIN_i(nByteCount - 1);                  
                         nByteCount <= nByteCount - 1;                                                       -- dec index used for selecting byte to send in byteArr

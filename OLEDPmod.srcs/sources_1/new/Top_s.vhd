@@ -77,7 +77,8 @@ component OLEDCtrl_s is
 end component; 
 
 component OnSeq_s is 
-    port(   clk : in std_logic; 
+    generic ( N : integer := 8); 
+    port (  clk : in std_logic; 
             rst : in std_logic;
             sw : in std_logic; 
             byteFlag : out std_logic; 
@@ -91,8 +92,7 @@ component OnSeq_s is
     );              
 end component;              
 
-component sclk_s is     
-    generic (N : integer := 8);             
+component sclk_s is            
     port (  clk : in std_logic;                 
             rst : in std_logic;                 
             clk_7p1MHz : out std_logic              
@@ -102,11 +102,13 @@ end component;
     -- Sync Signals -- 
 signal clk_W : std_logic := '0'; 
 signal rst_w : std_logic := '0'; 
-    -- Signals --               
+    -- Signals --        
+signal byteFlag_w : std_logic := '0';        
 signal CS_t : std_logic := '1';                                                                                             -- active low CS
 signal DC_t : std_logic := '0'; 
 signal MOSI_t : std_logic := '0'; 
 signal OLEDRdy_w : std_logic := '0'; 
+signal onOffFlag_w : std_logic := '0'; 
 signal PRst_t : std_logic := '1'; 
 signal PRst_w : std_logic := '1'; 
 signal Vbat_t : std_logic := '0';
@@ -162,7 +164,7 @@ begin
         clk => clk_w, 
         rst => rst_w, 
         sw => sw_w, 
-        byteFlag => byteFlag_w, 
+        byteFlag => onOffFlag_w, 
         OLEDPRst => PRst_w, 
         OLEDRdy => OLEDRdy_w, 
         OLEDVbat => Vbat_w, 
