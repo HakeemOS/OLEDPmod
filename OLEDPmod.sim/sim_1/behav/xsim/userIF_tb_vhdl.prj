@@ -1,0 +1,10 @@
+# compile vhdl design source files
+vhdl myLib  \
+"../../../../OLEDPmod.srcs/sources_1/imports/new/types_p.vhd" \
+
+vhdl xil_defaultlib  \
+"../../../../OLEDPmod.srcs/sources_1/new/userIF_s.vhd" \
+"../../../../OLEDPmod.srcs/sim_1/new/userIF_tb.vhd" \
+
+# Do not sort compile order
+nosort

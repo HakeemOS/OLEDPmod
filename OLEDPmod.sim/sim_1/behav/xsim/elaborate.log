@@ -17,6 +17,7 @@ Compiling architecture behavioral of entity xil_defaultlib.SPI_Tx [spi_tx_defaul
 Compiling architecture behavioral of entity xil_defaultlib.OLEDCtrl_s [\OLEDCtrl_s(3,0)(9,0)(7,0)\]
 Compiling architecture behavioral of entity xil_defaultlib.onSeq_S [\onSeq_S(3,0)(9,0)(7,0)\]
 Compiling architecture behavioral of entity xil_defaultlib.sclk_s [sclk_s_default]
+Compiling architecture behavioral of entity xil_defaultlib.userIF_s [\userIF_s(3,0)(9,0)(7,0)\]
 Compiling architecture structural of entity xil_defaultlib.Top_s [top_s_default]
 Compiling architecture behavioral of entity xil_defaultlib.top_tb
 Built simulation snapshot Top_tb_behav

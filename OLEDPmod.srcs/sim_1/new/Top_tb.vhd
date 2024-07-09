@@ -39,24 +39,23 @@ architecture Behavioral of Top_tb is
 
     --UUT/DUT -- 
 component Top_s is 
-    generic (N : integer := 8);
     port (  clk : in std_logic;
             rst : in std_logic; 
             sw : in std_logic; 
+            sw0 : in std_logic;
             CS : out std_logic; 
             DC : out std_logic; 
             MOSI : out std_logic; 
             PRst : out std_logic;
+            rdy : out std_logic; 
             sclk : out std_logic;  
             Vbat : out std_logic; 
             Vddc : out std_logic
     );
 end component; 
 
-    -- Generic Constants -- 
-constant N : integer := 8; 
     -- Signals -- 
-signal clk, rst, sw, CS, DC, MOSI, PRst, sclk, Vbat, Vddc : std_logic; 
+signal clk, rst, sw, sw0, CS, DC, MOSI, PRst, sclk, Vbat, Vddc : std_logic; 
     -- clk Signals -- 
 signal clk_period : time := 10ns; 
 signal clk_stop : boolean; 
@@ -73,13 +72,11 @@ begin
 
     --UUT/DUT -- 
     Top0 : Top_s 
-    generic map(
-        N => 8
-    )
     port map (
         clk => clk, 
         rst => rst, 
         sw => sw, 
+        sw0 => sw0, 
         CS => CS, 
         DC => DC, 
         MOSI => MOSI, 
@@ -94,6 +91,7 @@ begin
     begin
         rst <= '0'; 
         sw <= '0'; 
+        sw0 <= '0'; 
 
         wait for 100ns; 
 
@@ -101,6 +99,11 @@ begin
 
         wait for 255ms; 
 
+        sw0 <= '1'; 
+
+        wait for 10ms; 
+
+        sw0 <= '0'; 
         sw <= '0'; 
 
         wait; 

@@ -1,21 +1,15 @@
 # compile vhdl design source files
-vhdl xil_defaultlib  \
-"../../../../OLEDPmod.srcs/sources_1/new/SPI_Tx.vhd" \
-"../../../../OLEDPmod.srcs/sources_1/new/onSeq_S.vhd" \
-"../../../../OLEDPmod.srcs/sources_1/new/sclk_s.vhd" \
-"../../../../OLEDPmod.srcs/sources_1/new/Top_s.vhd" \
-
 vhdl myLib  \
 "../../../../OLEDPmod.srcs/sources_1/imports/new/types_p.vhd" \
 
 vhdl xil_defaultlib  \
-"../../../../OLEDPmod.srcs/sources_1/new/byteBuffer_s.vhd" \
 "../../../../OLEDPmod.srcs/sources_1/new/OLEDCtrl_s.vhd" \
-"../../../../OLEDPmod.srcs/sim_1/new/SPITx_tb.vhd" \
-"../../../../OLEDPmod.srcs/sim_1/new/onOffSeq_tb.vhd" \
-"../../../../OLEDPmod.srcs/sim_1/new/sclk_tb.vhd" \
-"../../../../OLEDPmod.srcs/sim_1/new/byteBuffer_tb.vhd" \
-"../../../../OLEDPmod.srcs/sim_1/new/OLEDCtrl_tb.vhd" \
+"../../../../OLEDPmod.srcs/sources_1/new/SPI_Tx.vhd" \
+"../../../../OLEDPmod.srcs/sources_1/new/Top_s.vhd" \
+"../../../../OLEDPmod.srcs/sources_1/new/byteBuffer_s.vhd" \
+"../../../../OLEDPmod.srcs/sources_1/new/onSeq_S.vhd" \
+"../../../../OLEDPmod.srcs/sources_1/new/sclk_s.vhd" \
+"../../../../OLEDPmod.srcs/sources_1/new/userIF_s.vhd" \
 "../../../../OLEDPmod.srcs/sim_1/new/Top_tb.vhd" \
 
 # Do not sort compile order

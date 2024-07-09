@@ -35,14 +35,16 @@ use myLib.types_p.all;                                                          
 --use UNISIM.VComponents.all;
 
 entity Top_s is
-    generic( N : integer := 8);
     port (  clk : in std_logic;
             rst : in std_logic; 
             sw : in std_logic; 
+            sw0 : in std_logic; 
             CS : out std_logic; 
             DC : out std_logic; 
             MOSI : out std_logic; 
+            pin3 : out std_logic; 
             PRst : out std_logic;
+            rdy : out std_logic; 
             sclk : out std_logic;  
             Vbat : out std_logic; 
             Vddc : out std_logic
@@ -86,6 +88,7 @@ component OnSeq_s is
             OLEDRdy : out std_logic;                                                                        -- signals to OLEDCtrl On/OFF seq complete 
             OLEDVbat : out std_logic;
             OLEDVddc : out std_logic; 
+            rdyFlag : out std_logic; 
             DCOUT : out std_logic_vector;                                                                   -- vector of D/C bits following same index as array of bytes (i.e corresponding D/C bit of byte at pos 1 also at pos 1 of vector)
             byteCount : out std_logic_vector(3 downto 0); 
             OLEDByte : out byteArr         
@@ -99,6 +102,17 @@ component sclk_s is
     );              
 end component;              
 
+component userIF_s is 
+    port (  clk : in std_logic; 
+            rst : in std_logic;
+            sw0 : in std_logic; 
+            byteFlag : out std_logic; 
+            DC : out std_logic_vector; 
+            byteCount : out std_logic_vector(3 downto 0); 
+            OLEDBytes : out byteArr
+    );
+end component; 
+
     -- Sync Signals -- 
 signal clk_W : std_logic := '0'; 
 signal rst_w : std_logic := '0'; 
@@ -108,19 +122,31 @@ signal CS_t : std_logic := '1';                                                 
 signal DC_t : std_logic := '0'; 
 signal MOSI_t : std_logic := '0'; 
 signal OLEDRdy_w : std_logic := '0'; 
-signal onOffFlag_w : std_logic := '0'; 
+signal onOffFlag_w : std_logic := '0';
+signal pin3_t : std_logic := '0';  
 signal PRst_t : std_logic := '1'; 
-signal PRst_w : std_logic := '1'; 
+signal PRst_w : std_logic := '1';
+signal rdy_t : std_logic := '0';  
+signal sclk_t : std_logic := '0'; 
+signal sclk_w : std_logic := '0'; 
+signal srcSel : std_logic := '0'; 
+signal sw_w : std_logic := '0'; 
 signal Vbat_t : std_logic := '0';
 signal Vbat_w : std_logic := '0'; 
 signal Vddc_t : std_logic := '0';  
 signal Vddc_w : std_logic := '0'; 
-signal sclk_t : std_logic := '0'; 
-signal sclk_w : std_logic := '0'; 
-signal sw_w : std_logic := '0'; 
+    -- byteCount signals -- 
 signal byteCount_w : std_logic_vector(3 downto 0) := (others => '0'); 
+signal onByteCount : std_logic_vector(3 downto 0) := (others => '0');
+signal uifByteCount : std_logic_vector(3 downto 0) := (others => '0');
+    -- D/C signals -- 
 signal DC_w : std_logic_vector(3 downto 0) := (others => '0'); 
+signal onDC : std_logic_vector(3 downto 0) := (others => '0');
+signal uifDC : std_logic_vector(3 downto 0) := (others => '0');
+    -- bytes IN signals -- 
 signal bytesIN_w : byteArr(9 downto 0) := (others => (others => '0')); 
+signal onBytesIN : byteArr(9 downto 0) := (others => (others => '0')); 
+signal uifBytesIN : byteArr(9 downto 0) := (others => (others => '0')); 
 
 
 begin
@@ -128,6 +154,11 @@ begin
     clk_w <= clk; 
     rst_w <= rst; 
     sw_w <= sw; 
+
+    -- Muxs -- 
+    byteCount_w <= onByteCount when srcSel = '1' else uifByteCount; 
+    DC_w <= onDC when srcSel = '1' else uifDC; 
+    bytesIN_w <= onBytesIN when srcSel = '1' else uifBytesIN; 
 
     -- Component Instances -- 
     OC0 : OLEDCtrl_s 
@@ -169,9 +200,10 @@ begin
         OLEDRdy => OLEDRdy_w, 
         OLEDVbat => Vbat_w, 
         OLEDVddc => Vddc_w, 
-        DCOUT => DC_w, 
-        byteCount => byteCount_w,
-        OLEDByte => bytesIN_w  
+        rdyFlag => rdy_t, 
+        DCOUT => onDC, 
+        byteCount => onByteCount,
+        OLEDByte => onBytesIN  
     ); 
 
     sclk0 : sclk_s
@@ -180,15 +212,40 @@ begin
         rst => rst_w, 
         clk_7p1MHz => sclk_w 
     ); 
+
+    UIF0 : userIF_s 
+    port map (
+        clk => clk, 
+        rst => rst, 
+        sw0 => sw0, 
+        byteFlag => byteFlag_w,
+        DC => uifDC,
+        byteCount => uifByteCount, 
+        OLEDBytes => uifBytesIN
+    );
+
+    busSelProc : process( clk, rst, rdy_t, srcSel, onOffFlag_w )
+    begin
+        if (falling_edge(clk)) then
+            if (rst = '1') then
+                srcSel <= '0'; 
+            elsif (onOffFlag_w = '1') then
+                srcSel <= '1';
+            elsif (srcSel = '1' and rdy_t = '1') then
+                srcSel <= '0'; 
+            end if ;
+        end if ;
+    end process ; -- busSelProc
     
     -- Signal to OUT -- 
     CS <= CS_t;
     DC <= DC_t;
     MOSI <= MOSI_t;
+    pin3 <= pin3_t; 
     PRst <= PRst_t;
+    rdy <= rdy_t; 
     Vbat <= Vbat_t;
     Vddc <= Vddc_t;
     sclk <= sclk_t;
-
 
 end Structural;

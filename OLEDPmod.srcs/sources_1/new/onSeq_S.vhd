@@ -45,6 +45,7 @@ entity onSeq_S is
             OLEDRdy : out std_logic;                                                                        -- signals to OLEDCtrl On/OFF seq complete 
             OLEDVbat : out std_logic;
             OLEDVddc : out std_logic; 
+            rdyFlag : out std_logic;                                                                        -- in sync with OLEDRdy; drives OUT LED when OLEDRdy HI
             DCOUT : out std_logic_vector;                                                                   -- vector of D/C bits following same index as array of bytes (i.e corresponding D/C bit of byte at pos 1 also at pos 1 of vector)
             byteCount : out std_logic_vector(3 downto 0); 
             OLEDByte : out byteArr
@@ -57,16 +58,19 @@ constant c_Delay4us : std_logic_vector(11 downto 0) := x"18F";                  
 constant c_Delay200ms :  std_logic_vector(27 downto 0) := x"1312CFF";                                       -- constant = 19,999,99 
     -- State Initialization --                  
 type states is (idle, rstStt, s0, s1, s2, s3, s4, s5, s6);                                                  -- s0 -> s3 => On Seq; s4 - s6 => Off Seq           
-signal stt: states := idle; 
+signal stt : states := idle; 
     -- Signals --
-signal powerOn : std_logic := '0'; 
-signal powerOff : std_logic := '0'; 
-signal running : std_logic := '0'; 
+signal byteFlag_t : std_logic := '0';
 signal OLEDPRst_t : std_logic := '1';
 signal OLEDRdy_t : std_logic := '0';
+signal OLEDRdyFlag : std_logic := '0'; 
 signal OLEDVbat_t : std_logic := '0'; 
-signal OLEDVddc_t : std_logic := '0';  
-signal byteFlag_t : std_logic := '0';
+signal OLEDVddc_t : std_logic := '0'; 
+signal powerOn : std_logic := '0'; 
+signal powerOff : std_logic := '0';
+signal rdyFlag_t : std_logic :='0';                                                                         -- in sync with OLEDRdy; drives OUT LED when OLEDRdy HI
+signal rstDone : std_logic := '0';  
+signal running : std_logic := '0'; 
 signal byteCount_t : std_logic_vector (3 downto 0) := (others => '0'); 
 signal DCOUT_t : std_logic_vector(3 downto 0) := (others => '0');                                           -- length 4 vector limits number of D/C bits and therefore bytes OUT by this module to 4 
 signal OLEDByte0_t : std_logic_vector(N-1 downto 0) := (others => '0');                                     -- byte to fill 0th position of OLEDByte byteArr
@@ -78,14 +82,19 @@ signal delay200ms : std_logic_vector(27 downto 0) := (others => '0');
 begin
     -- Processes -- 
     trns : process( clk, rst, sw, stt, powerOn, powerOff, running, OLEDPRst_t, OLEDVddc_t, OLEDVbat_t, OLEDByte0_t, 
-                    OLEDRdy_t  )
+                    OLEDRdyFlag  )
     begin
         if (rising_edge(clk)) then
             if (rst = '1') then
                 stt <= rstStt; 
             else
                 case( stt ) is
-                    when rstStt => stt <= idle; 
+                    when rstStt =>
+                        if (rstDone = '1') then
+                            stt <= idle; 
+                        else 
+                            stt <= rstStt; 
+                        end if ; 
                     when idle =>
                         if (powerOn = '1') then
                             stt <= s0; 
@@ -108,17 +117,15 @@ begin
                         end if ;
                     when s2 => stt <= s3; 
                     when s3 => 
-                        if (OLEDRdy_t = '1') then
+                        if (OLEDRdyFlag = '1') then
                             stt <= idle; 
-                        --elsif () then
-                            
                         else
                             stt <= s3; 
                         end if ;
                     when s4 => stt <= s5; 
                     when s5 => stt <= s6; 
                     when others =>
-                        if (OLEDRdy_t = '0') then
+                        if (OLEDRdyFlag = '0') then
                             stt <= idle; 
                         else 
                             stt <= s6; 
@@ -129,50 +136,51 @@ begin
     end process ; -- trns
 
     output : process( clk, stt, sw, powerOn, powerOff, running, OLEDPRst_t, OLEDVddc_t, OLEDVbat_t, OLEDByte0_t, 
-                        OLEDRdy_t, delay4us, delay200ms )
+                        OLEDRdy_t, OLEDRdyFlag, delay4us, delay200ms )
     begin
         -- Sync Defaults --
         --if rising_edge(clk) then
         --    byteFlag_t <= '0'; 
         --end if ;
-        
-        case( stt ) is
-            when rstStt => 
-                powerOn <= '0'; 
-                powerOff <= '0';
-                running <= '0'; 
-                OLEDPRst_t <= '1'; 
-                OLEDVddc_t <= '0'; 
-                OLEDVbat_t <= '0';
-                OLEDRdy_t <= '0'; 
-                byteCount_t <= (others => '0'); 
-                DCOUT_t <= (others => '0'); 
-                OLEDByte0_t <= (others => '0'); 
-                delay4us <= (others => '0'); 
-                delay200ms <= (others => '0'); 
-            when idle =>
-                delay4us <= (others => '0'); 
-                delay200ms <= (others => '0'); 
-                if (sw = '1' and running = '0') then
-                    powerOn <= '1'; 
-                    powerOff <= '0'; 
-                    running <= '1'; 
-                    OLEDPRst_t <= '0'; 
-                elsif (sw = '0' and running = '1') then
+        if (rising_edge(clk)) then
+            case( stt ) is
+                when rstStt => 
                     powerOn <= '0'; 
-                    powerOff <= '1'; 
-                end if ;
-            when s0 => 
-                if (rising_edge(clk)) then
+                    powerOff <= '0';
+                    running <= '0'; 
+                    OLEDPRst_t <= '1'; 
+                    OLEDVddc_t <= '0'; 
+                    OLEDVbat_t <= '0';
+                    OLEDRdy_t <= '0'; 
+                    OLEDRdyFlag <= '0'; 
+                    rdyFlag_t <= '0'; 
+                    byteCount_t <= (others => '0'); 
+                    DCOUT_t <= (others => '0'); 
+                    OLEDByte0_t <= (others => '0'); 
+                    delay4us <= (others => '0'); 
+                    delay200ms <= (others => '0'); 
+                    rstDone <= '1'; 
+                when idle =>
+                    rstDone <= '0'; 
+                    delay4us <= (others => '0'); 
+                    delay200ms <= (others => '0'); 
+                    if (sw = '1' and running = '0') then 
+                        powerOff <= '0'; 
+                        running <= '1'; 
+                        OLEDPRst_t <= '0'; 
+                        powerOn <= '1';
+                    elsif (sw = '0' and running = '1') then
+                        powerOn <= '0'; 
+                        powerOff <= '1'; 
+                    end if ;
+                when s0 => 
                     if (delay4us = c_Delay4us) then
                         OLEDPRst_t <= '1'; 
                         delay4us <= (others => '0'); 
                     else 
                         delay4us <= std_logic_vector(unsigned(delay4us) + 1); 
                     end if ;
-                end if ;
-            when s1 => 
-                if (rising_edge(clk)) then
+                when s1 => 
                     if (delay4us = c_Delay4us) then
                         OLEDVddc_t <= '1'; 
                         OLEDVbat_t <= '1'; 
@@ -180,46 +188,47 @@ begin
                     else 
                         delay4us <= std_logic_vector(unsigned(delay4us) + 1); 
                     end if ;
-                end if ;
-            when s2 => 
-                OLEDByte0_t <= x"AF";                                                                       -- display on command 
-                DCOUT_t <= "0000";                                                                          -- only one LSB meaningful data D/C = => command byte 
-                --OLEDByteArr_t(0) <= x"AF";                                                                  -- display on command, byteArr signal method
-                byteCount_t <= std_logic_vector(to_unsigned(1, 4));                                         -- must use to_unsigned(convertingInt, vectorLength) to cast a integer value on its own (called universal int) to a std_logic_vector 
-                byteFlag_t <= '1'; 
-            when s3 => 
-                if (rising_edge(clk)) then
+                when s2 => 
+                    OLEDByte0_t <= x"AF";                                                                       -- display on command 
+                    DCOUT_t <= "0000";                                                                          -- only one LSB meaningful data D/C = => command byte 
+                    --OLEDByteArr_t(0) <= x"AF";                                                                  -- display on command, byteArr signal method
+                    byteCount_t <= std_logic_vector(to_unsigned(1, 4));                                         -- must use to_unsigned(convertingInt, vectorLength) to cast a integer value on its own (called universal int) to a std_logic_vector 
+                    byteFlag_t <= '1'; 
+                when s3 => 
                     byteFlag_t <= '0';                                                                      -- Wasn't able to use sync default val for this specific reg, this is fix 
                     if (delay200ms = c_Delay200ms) then                                                     -- Once delay is finished we can signal to OLEDCtrl OLED is rdy to be used
                         OLEDRdy_t <= '1';
+                        rdyFlag_t <= '1'; 
                         delay200ms <= (others => '0' ) ;    
-                        powerOn <= '0';                                    
+                        powerOn <= '0';        
+                        OLEDRdyFlag <= '1';                             
                     else 
                         delay200ms <= std_logic_vector(unsigned(delay200ms) + 1); 
                     end if ;
-                end if ;
-            when s4 => 
-                OLEDByte0_t <= x"AE";                                                                       -- display off command     
-                DCOUT_t <= "0000";                                                                          -- only one LSB meaningful data D/C = => command byte  
-                --OLEDByteArr_t(0) <= x"AF";                                                                     -- display off commmand, byteArr signal method   
-                byteCount_t <= std_logic_vector(to_unsigned(1, 4));
-                byteFlag_t <= '1'; 
-            when s5 => 
-                OLEDVddc_t <= '0'; 
-                OLEDVbat_t <= '0'; 
-            when others =>
-                byteFlag_t <= '0';                                                                          -- Wasn't able to use sync default val for this specific reg, this is fix 
-                if (rising_edge(clk)) then
+                when s4 => 
+                    OLEDByte0_t <= x"AE";                                                                       -- display off command     
+                    DCOUT_t <= "0000";                                                                          -- only one LSB meaningful data D/C = => command byte  
+                    --OLEDByteArr_t(0) <= x"AF";                                                                     -- display off commmand, byteArr signal method   
+                    byteCount_t <= std_logic_vector(to_unsigned(1, 4));
+                    byteFlag_t <= '1'; 
+                when s5 => 
+                    OLEDVddc_t <= '0'; 
+                    OLEDVbat_t <= '0'; 
+                when others =>
+                    byteFlag_t <= '0';                                                                          -- Wasn't able to use sync default val for this specific reg, this is fix 
                     if (delay200ms = c_Delay200ms) then
                         OLEDRdy_t <= '0';
+                        rdyFlag_t <= '0'; 
                         delay200ms <= (others => '0' ) ;    
                         powerOff <= '0';      
-                        running <= '0';                               
+                        running <= '0';  
+                        OLEDRdyFlag <= '0';                              
                     else 
                         delay200ms <= std_logic_vector(unsigned(delay200ms) + 1); 
                     end if ;
-                end if ;
-        end case ;
+            end case ;
+        end if ;
+        
     end process ; -- output
 
     -- Signals to OUT -- 
@@ -228,6 +237,7 @@ begin
     OLEDRdy <= OLEDRdy_t; 
     OLEDVbat <= OLEDVbat_t;
     OLEDVddc <= OLEDVddc_t; 
+    rdyFlag <= rdyFlag_t; 
     DCOUT <= DCOUT_t; 
     byteCount <= byteCount_t; 
     OLEDByte(0) <= (OLEDByte0_t); 

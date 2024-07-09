@@ -1,0 +1,10 @@
+INFO: [VRFC 10-163] Analyzing VHDL file "C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.sim/sim_1/synth/func/xsim/Top_tb_func_synth.vhd" into library xil_defaultlib
+INFO: [VRFC 10-3107] analyzing entity 'SPI_Tx'
+INFO: [VRFC 10-3107] analyzing entity 'byteBuffer_s'
+INFO: [VRFC 10-3107] analyzing entity 'onSeq_S'
+INFO: [VRFC 10-3107] analyzing entity 'sclk_s'
+INFO: [VRFC 10-3107] analyzing entity 'userIF_s'
+INFO: [VRFC 10-3107] analyzing entity 'OLEDCtrl_s'
+INFO: [VRFC 10-3107] analyzing entity 'Top_s'
+INFO: [VRFC 10-163] Analyzing VHDL file "C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.srcs/sim_1/new/Top_tb.vhd" into library xil_defaultlib
+INFO: [VRFC 10-3107] analyzing entity 'Top_tb'

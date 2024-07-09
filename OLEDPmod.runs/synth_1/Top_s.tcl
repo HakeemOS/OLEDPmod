@@ -70,6 +70,8 @@ proc create_report { reportName command } {
   }
 }
 OPTRACE "synth_1" START { ROLLUP_AUTO }
+set_param chipscope.maxJobs 1
+set_param xicom.use_bs_reader 1
 set_msg_config -id {Common 17-41} -limit 10000000
 OPTRACE "Creating in-memory project" START { }
 create_project -in_memory -part xc7a35tcpg236-1
@@ -87,15 +89,16 @@ set_property ip_output_repo c:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPm
 set_property ip_cache_permissions {read write} [current_project]
 OPTRACE "Creating in-memory project" END { }
 OPTRACE "Adding files" START { }
+read_vhdl -library myLib C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.srcs/sources_1/imports/new/types_p.vhd
 read_vhdl -library xil_defaultlib {
+  C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.srcs/sources_1/new/OLEDCtrl_s.vhd
   C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.srcs/sources_1/new/SPI_Tx.vhd
+  C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.srcs/sources_1/new/byteBuffer_s.vhd
   C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.srcs/sources_1/new/onSeq_S.vhd
   C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.srcs/sources_1/new/sclk_s.vhd
+  C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.srcs/sources_1/new/userIF_s.vhd
   C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.srcs/sources_1/new/Top_s.vhd
-  C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.srcs/sources_1/new/byteBuffer_s.vhd
-  C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.srcs/sources_1/new/OLEDCtrl_s.vhd
 }
-read_vhdl -library myLib C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.srcs/sources_1/imports/new/types_p.vhd
 OPTRACE "Adding files" END { }
 # Mark all dcp files as not used in implementation to prevent them from being
 # stitched into the results of this synthesis run. Any black boxes in the
@@ -105,6 +108,9 @@ OPTRACE "Adding files" END { }
 foreach dcp [get_files -quiet -all -filter file_type=="Design\ Checkpoint"] {
   set_property used_in_implementation false $dcp
 }
+read_xdc C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.srcs/constrs_1/new/contraints.xdc
+set_property used_in_implementation false [get_files C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.srcs/constrs_1/new/contraints.xdc]
+
 set_param ips.enableIPCacheLiteLoad 1
 close [open __synthesis_is_running__ w]
 
