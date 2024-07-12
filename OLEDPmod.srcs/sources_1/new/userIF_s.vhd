@@ -125,8 +125,8 @@ begin
                         null; 
                     end if ;
                 when drawLine =>                     
-                        byteCount_t <= std_logic_vector(to_unsigned(1, 4));
-                        DC_t <= ('1', others => '0');  
+                        byteCount_t <= std_logic_vector(to_unsigned(5, 4));
+                        DC_t <= (others => '0');  
                         OLEDBytes_t(4 downto 0) <= (x"21", x"01", x"10", x"26", x"04"); 
                         byteFlag_t <= '1'; 
                         LxFlag <= '1'; 

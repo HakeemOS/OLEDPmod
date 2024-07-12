@@ -42,7 +42,7 @@ entity Top_s is
             CS : out std_logic; 
             DC : out std_logic; 
             MOSI : out std_logic; 
-            pin3 : out std_logic; 
+            --pin3 : out std_logic; 
             PRst : out std_logic;
             rdy : out std_logic; 
             sclk : out std_logic;  
@@ -123,7 +123,7 @@ signal DC_t : std_logic := '0';
 signal MOSI_t : std_logic := '0'; 
 signal OLEDRdy_w : std_logic := '0'; 
 signal onOffFlag_w : std_logic := '0';
-signal pin3_t : std_logic := '0';  
+--signal pin3_t : std_logic := '0';                                                                                         -- pin used to hold unused pin at 0;  
 signal PRst_t : std_logic := '1'; 
 signal PRst_w : std_logic := '1';
 signal rdy_t : std_logic := '0';  
@@ -140,9 +140,9 @@ signal byteCount_w : std_logic_vector(3 downto 0) := (others => '0');
 signal onByteCount : std_logic_vector(3 downto 0) := (others => '0');
 signal uifByteCount : std_logic_vector(3 downto 0) := (others => '0');
     -- D/C signals -- 
-signal DC_w : std_logic_vector(3 downto 0) := (others => '0'); 
-signal onDC : std_logic_vector(3 downto 0) := (others => '0');
-signal uifDC : std_logic_vector(3 downto 0) := (others => '0');
+signal DC_w : std_logic_vector(9 downto 0) := (others => '0'); 
+signal onDC : std_logic_vector(9 downto 0) := (others => '0');
+signal uifDC : std_logic_vector(9 downto 0) := (others => '0');
     -- bytes IN signals -- 
 signal bytesIN_w : byteArr(9 downto 0) := (others => (others => '0')); 
 signal onBytesIN : byteArr(9 downto 0) := (others => (others => '0')); 
@@ -241,7 +241,7 @@ begin
     CS <= CS_t;
     DC <= DC_t;
     MOSI <= MOSI_t;
-    pin3 <= pin3_t; 
+    --pin3 <= pin3_t; 
     PRst <= PRst_t;
     rdy <= rdy_t; 
     Vbat <= Vbat_t;

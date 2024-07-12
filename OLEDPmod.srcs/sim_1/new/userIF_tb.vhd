@@ -52,7 +52,7 @@ end component;
     
     -- Signals -- 
 signal clk, rst, sw0, byteFlag : std_logic; 
-signal DC : std_logic_vector(3 downto 0); 
+signal DC : std_logic_vector(9 downto 0); 
 signal byteCount : std_logic_vector(3 downto 0); 
 signal OLEDBytes : byteArr(9 downto 0); 
     -- clk Signals --

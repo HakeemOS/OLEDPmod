@@ -115,7 +115,6 @@ proc step_failed { step } {
 OPTRACE "impl_1" END { }
 }
 
-set_msg_config -id {Common 17-41} -limit 10000000
 
 OPTRACE "impl_1" START { ROLLUP_1 }
 OPTRACE "Phase: Init Design" START { ROLLUP_AUTO }
@@ -124,7 +123,6 @@ set ACTIVE_STEP init_design
 set rc [catch {
   create_msg_db init_design.pb
   set_param chipscope.maxJobs 1
-  set_param xicom.use_bs_reader 1
   reset_param project.defaultXPMLibraries 
   open_checkpoint C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.runs/impl_1/Top_s.dcp
   set_property webtalk.parent_dir C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.cache/wt [current_project]
