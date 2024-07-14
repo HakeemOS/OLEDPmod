@@ -46,7 +46,7 @@ entity initSeq_s is
             OLEDVbat : out std_logic;
             OLEDVddc : out std_logic; 
             rdyFlag : out std_logic;                                                                        -- in sync with OLEDRdy; drives OUT LED when OLEDRdy HI
-            DCOUT : out std_logic_vector;                                                                   -- vector of D/C bits following same index as array of bytes (i.e corresponding D/C bit of byte at pos 1 also at pos 1 of vector)
+            DC : out std_logic_vector;                                                                   -- vector of D/C bits following same index as array of bytes (i.e corresponding D/C bit of byte at pos 1 also at pos 1 of vector)
             byteCount : out std_logic_vector(3 downto 0); 
             OLEDBytes : out byteArr
     );
@@ -54,8 +54,8 @@ end initSeq_s;
 
 architecture Behavioral of initSeq_s is
     -- Constants -- 
-constant c_Delay2ms : std_logic_vector(19 downto 0) := x"30D3F"; 
-constant c_Delay100ms : std_logic_vector(15 downto 0) := x"270F";  
+constant c_Delay2ms : std_logic_vector(19 downto 0) := x"30D40"; 
+constant c_Delay100ms : std_logic_vector(23 downto 0) := x"98967F";  
     -- State Initialization --
 type states is (idle, rstStt, s0, s1, s2, s3, s4, s5 ); 
 signal stt : states := idle; 
@@ -72,9 +72,9 @@ signal rstDone : std_logic := '0';
 signal running : std_logic := '0'; 
 signal sttFlag : std_logic := '0'; 
 signal byteCount_t : std_logic_vector (3 downto 0) := (others => '0'); 
-signal DCOUT_t : std_logic_vector(M-1 downto 0) := (others => '0');                                           -- length 4 vector limits number of D/C bits and therefore bytes OUT by this module to 4        
-signal delay2ms : std_logic_vector(19 downto 0) := (others => '0');  
-signal delay100ms : std_logic_vector(15 downto 0) := (others => '0'); 
+signal DC_t : std_logic_vector(M-1 downto 0) := (others => '0');                                           -- length 4 vector limits number of D/C bits and therefore bytes OUT by this module to 4        
+signal delay2ms : std_logic_vector(19 downto 0) := (0 => '1', others => '0');  
+signal delay100ms : std_logic_vector(23 downto 0) := (others => '0'); 
 signal OLEDBytes_t : byteArr(M-1 downto 0) := (others => (others => '0')); 
 
 begin
@@ -99,27 +99,27 @@ begin
                             stt <= idle; 
                         end if ;
                     when s0 => 
-                        if (sttFlag <= '1') then
+                        if (sttFlag = '1') then
                             stt <= s1; 
                         else 
                             stt <= s0; 
                         end if ;
                     when s1 => stt <= s2; 
                     when s2 =>
-                        if (sttFlag <= '1') then
-                            stt <= s1; 
+                        if (sttFlag = '1') then
+                            stt <= s3; 
                         else 
-                            stt <= s0; 
+                            stt <= s2; 
                         end if ;
                     when s3 => 
-                        if (sttFlag <= '1') then
-                            stt <= s1; 
+                        if (sttFlag = '1') then
+                            stt <= s4; 
                         else 
-                            stt <= s0; 
+                            stt <= s3; 
                         end if ;
                     when s4 => stt <= s5; 
                     when others =>
-                        if (sttFlag <= '1') then
+                        if (sttFlag = '1') then
                             stt <= idle; 
                         else
                             stt <= s5; 
@@ -149,15 +149,15 @@ begin
                     rdyFlag_t <= '0';
                     running <= '0';
                     byteCount_t <= (others => '0'); 
-                    DCOUT_t <= (others => '0'); 
-                    delay2ms <= (others => '0'); 
+                    DC_t <= (others => '0'); 
+                    delay2ms <= (0 => '1', others => '0');  
                     delay100ms <= (others => '0'); 
                     OLEDBytes_t <= (others => (others => '0')); 
                     rstDone <= '1'; 
                 when idle => 
                     rstDone <= '0';
                     OLEDVddc_t <= '0';  
-                    delay2ms <= (others => '0'); 
+                    delay2ms <= (0 => '1', others => '0');  
                     delay100ms <= (others => '0'); 
                     if (running = '0' and sw = '1') then
                         running <= '1'; 
@@ -168,9 +168,10 @@ begin
                 when s0 =>
                     if (delay2ms = c_Delay2ms) then
                         OLEDBytes_t(0) <= x"AE";
-                        DCOUT_t <= (others => '0'); 
+                        DC_t <= (others => '0'); 
                         byteCount_t <= std_logic_vector(to_unsigned(1, 4)); 
                         byteFlag_t <= '1'; 
+                        delay2ms <= (others => '0'); 
                         sttFlag <= '1'; 
                     else
                         delay2ms <= std_logic_vector(unsigned(delay2ms) + 1);  
@@ -181,6 +182,7 @@ begin
                 when s2 => 
                     if (delay2ms = c_Delay2ms) then
                         OLEDPRst_t <= '1'; 
+                        delay2ms <= (others => '0'); 
                         sttFlag <= '1'; 
                     else
                         delay2ms <= std_logic_vector(unsigned(delay2ms) + 1);
@@ -188,9 +190,10 @@ begin
                 when s3 => 
                     if (delay2ms = c_Delay2ms) then
                         OLEDBytes_t(3 downto 0) <= (x"8D", x"14", x"D9", x"F1");
-                        DCOUT_t <= (others => '0');  
+                        DC_t <= (others => '0');  
                         byteCount_t <= std_logic_vector(to_unsigned(4, 4)); 
                         byteFlag_t <= '1'; 
+                        delay2ms <= (others => '0'); 
                         sttFlag <= '1'; 
                     else
                         delay2ms <= std_logic_vector(unsigned(delay2ms) + 1);
@@ -198,10 +201,11 @@ begin
                 when s4 => OLEDVbat_t <= '0'; 
                 when others =>
                     if (delay100ms = c_Delay100ms) then
-                        OLEDBytes_t(7 downto 0) <= (x"81", x"FF", x"A0", x"C0", x"DA", x"00", x"AF");
-                        DCOUT_t <= (others => '0');  
-                        byteCount_t <= std_logic_vector(to_unsigned(8, 4)); 
+                        OLEDBytes_t(6 downto 0) <= (x"81", x"FF", x"A0", x"C0", x"DA", x"00", x"AF");
+                        DC_t <= (others => '0');  
+                        byteCount_t <= std_logic_vector(to_unsigned(7, 4)); 
                         byteFlag_t <= '1'; 
+                        delay100ms <= (others => '0'); 
                         sttFlag <= '1'; 
                     else
                         delay100ms <= std_logic_vector(unsigned(delay100ms) + 1);
@@ -217,7 +221,7 @@ begin
     OLEDVbat <= OLEDVbat_t; 
     OLEDVddc <= OLEDVddc_t; 
     rdyFlag <= rdyFlag_t; 
-    DCOUT <= DCOUT_t; 
+    DC <= DC_t; 
     byteCount <= byteCount_t; 
     OLEDBytes <= OLEDBytes_t; 
 

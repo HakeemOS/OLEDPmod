@@ -91,7 +91,7 @@ read_vhdl -library xil_defaultlib {
   C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.srcs/sources_1/new/OLEDCtrl_s.vhd
   C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.srcs/sources_1/new/SPI_Tx.vhd
   C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.srcs/sources_1/new/byteBuffer_s.vhd
-  C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.srcs/sources_1/new/onSeq_S.vhd
+  C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.srcs/sources_1/new/initSeq_s.vhd
   C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.srcs/sources_1/new/sclk_s.vhd
   C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.srcs/sources_1/new/userIF_s.vhd
   C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.srcs/sources_1/new/Top_s.vhd

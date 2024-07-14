@@ -77,6 +77,7 @@ signal clk_period2 : time := 20ns;
 signal clk_stop : boolean; 
 
 begin
+    -- clk init --
     clkproc : process 
     begin
         clk <= '1'; 
@@ -93,6 +94,7 @@ begin
         wait for clk_period2/2; 
     end process ; -- clkproc2
 
+    -- DUT/UUT -- 
     uut : OLEDCtrl_s
     generic map (
         N => 8
@@ -119,6 +121,7 @@ begin
         MOSI => MOSI
     ); 
 
+    -- Stimulus -- 
     stim : process
     begin
         rst <= '0'; 

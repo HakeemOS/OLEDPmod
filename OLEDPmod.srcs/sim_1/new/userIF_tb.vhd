@@ -81,6 +81,7 @@ begin
         OLEDBytes => OLEDBytes
     );
 
+    -- Stimulus -- 
     stim : process 
     begin
         sw0 <= '0'; 

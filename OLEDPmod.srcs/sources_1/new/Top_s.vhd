@@ -78,8 +78,27 @@ component OLEDCtrl_s is
     ); 
 end component; 
 
-component OnSeq_s is 
-    generic ( N : integer := 8); 
+    -- Old ON Module --
+--component OnSeq_s is 
+--    generic ( N : integer := 8); 
+--    port (  clk : in std_logic; 
+--            rst : in std_logic;
+--            sw : in std_logic; 
+--            byteFlag : out std_logic; 
+--            OLEDPRst : out std_logic; 
+--            OLEDRdy : out std_logic;                                                                        -- signals to OLEDCtrl On/OFF seq complete 
+--            OLEDVbat : out std_logic;
+--            OLEDVddc : out std_logic; 
+--            rdyFlag : out std_logic; 
+--            DCOUT : out std_logic_vector;                                                                   -- vector of D/C bits following same index as array of bytes (i.e corresponding D/C bit of byte at pos 1 also at pos 1 of vector)
+--            byteCount : out std_logic_vector(3 downto 0); 
+--            OLEDByte : out byteArr         
+--    );              
+--end component;             
+
+    -- New ON Module -- 
+component initSeq_s is 
+    generic (M : integer := 10);                                                                            -- Max buffer size 
     port (  clk : in std_logic; 
             rst : in std_logic;
             sw : in std_logic; 
@@ -88,12 +107,12 @@ component OnSeq_s is
             OLEDRdy : out std_logic;                                                                        -- signals to OLEDCtrl On/OFF seq complete 
             OLEDVbat : out std_logic;
             OLEDVddc : out std_logic; 
-            rdyFlag : out std_logic; 
-            DCOUT : out std_logic_vector;                                                                   -- vector of D/C bits following same index as array of bytes (i.e corresponding D/C bit of byte at pos 1 also at pos 1 of vector)
+            rdyFlag : out std_logic;                                                                        -- in sync with OLEDRdy; drives OUT LED when OLEDRdy HI
+            DC : out std_logic_vector;                                                                      -- vector of D/C bits following same index as array of bytes (i.e corresponding D/C bit of byte at pos 1 also at pos 1 of vector)
             byteCount : out std_logic_vector(3 downto 0); 
-            OLEDByte : out byteArr         
-    );              
-end component;              
+            OLEDBytes : out byteArr
+    );
+end component; 
 
 component sclk_s is            
     port (  clk : in std_logic;                 
@@ -187,24 +206,46 @@ begin
         OLEDVddcOUT => Vddc_t
     ); 
     
-    OnSeq0 : OnSeq_s
+    -- Old ON sw module --
+    --OnSeq0 : OnSeq_s
+    --generic map (
+    --    N => 8
+    --)
+    --port map (
+    --    clk => clk_w, 
+    --    rst => rst_w, 
+    --    sw => sw_w, 
+    --    byteFlag => onOffFlag_w, 
+    --    OLEDPRst => PRst_w, 
+    --    OLEDRdy => OLEDRdy_w, 
+    --    OLEDVbat => Vbat_w, 
+    --    OLEDVddc => Vddc_w, 
+    --    rdyFlag => rdy_t, 
+    --    DCOUT => onDC, 
+    --    byteCount => onByteCount,
+    --    OLEDByte => onBytesIN  
+    --); 
+
+    -- New ON sw Module -- 
+    IS0 : initSeq_s 
     generic map (
-        N => 8
+        M => 10
     )
     port map (
-        clk => clk_w, 
-        rst => rst_w, 
-        sw => sw_w, 
-        byteFlag => onOffFlag_w, 
+        clk => clk_w,
+        rst => rst_w,
+        sw => sw_w,
+        byteFlag => onOffFlag_w,
         OLEDPRst => PRst_w, 
         OLEDRdy => OLEDRdy_w, 
         OLEDVbat => Vbat_w, 
         OLEDVddc => Vddc_w, 
         rdyFlag => rdy_t, 
-        DCOUT => onDC, 
-        byteCount => onByteCount,
-        OLEDByte => onBytesIN  
+        DC => onDC, 
+        byteCount => onByteCount,  
+        OLEDBytes => onBytesIN
     ); 
+
 
     sclk0 : sclk_s
     port map (

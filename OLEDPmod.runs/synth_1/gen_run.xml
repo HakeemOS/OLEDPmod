@@ -1,11 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GenRun Id="synth_1" LaunchPart="xc7a35tcpg236-1" LaunchTime="1720531252">
+<GenRun Id="synth_1" LaunchPart="xc7a35tcpg236-1" LaunchTime="1720792271">
   <File Type="PA-TCL" Name="Top_s.tcl"/>
+  <File Type="RDS-PROPCONSTRS" Name="Top_s_drc_synth.rpt"/>
   <File Type="REPORTS-TCL" Name="Top_s_reports.tcl"/>
   <File Type="RDS-RDS" Name="Top_s.vds"/>
   <File Type="RDS-UTIL" Name="Top_s_utilization_synth.rpt"/>
   <File Type="RDS-UTIL-PB" Name="Top_s_utilization_synth.pb"/>
   <File Type="RDS-DCP" Name="Top_s.dcp"/>
+  <File Type="VDS-TIMINGSUMMARY" Name="Top_s_timing_summary_synth.rpt"/>
+  <File Type="VDS-TIMING-PB" Name="Top_s_timing_summary_synth.pb"/>
   <FileSet Name="sources" Type="DesignSrcs" RelSrcDir="$PSRCDIR/sources_1" RelGenDir="$PGENDIR/sources_1">
     <Filter Type="Srcs"/>
     <File Path="$PSRCDIR/sources_1/imports/new/types_p.vhd">
@@ -35,7 +38,7 @@
         <Attr Name="UsedIn" Val="simulation"/>
       </FileInfo>
     </File>
-    <File Path="$PSRCDIR/sources_1/new/onSeq_S.vhd">
+    <File Path="$PSRCDIR/sources_1/new/initSeq_s.vhd">
       <FileInfo>
         <Attr Name="UsedIn" Val="synthesis"/>
         <Attr Name="UsedIn" Val="simulation"/>
@@ -55,6 +58,13 @@
     </File>
     <File Path="$PSRCDIR/sources_1/new/Top_s.vhd">
       <FileInfo>
+        <Attr Name="UsedIn" Val="synthesis"/>
+        <Attr Name="UsedIn" Val="simulation"/>
+      </FileInfo>
+    </File>
+    <File Path="$PSRCDIR/sources_1/new/onSeq_S.vhd">
+      <FileInfo>
+        <Attr Name="AutoDisabled" Val="1"/>
         <Attr Name="UsedIn" Val="synthesis"/>
         <Attr Name="UsedIn" Val="simulation"/>
       </FileInfo>
