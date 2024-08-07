@@ -48,12 +48,12 @@ end userIF_s;
 
 architecture Behavioral of userIF_s is
     -- State Iinitialization -- 
-type states is (idle, rstStt, drawLine, holdStt); 
+type states is (idle, rstStt, fullDisplayOn, holdStt); 
 signal stt : states := idle; 
     -- Signals --
 signal byteFlag_t : std_logic := '0';
-signal dlDone : std_logic := '0';  
-signal dlFlag : std_logic := '0'; 
+signal fdoDone : std_logic := '0';  
+signal fdoFlag : std_logic := '0'; 
 signal LxFlag : std_logic := '0'; 
 signal rstDone : std_logic := '0'; 
 signal DC_t : std_logic_vector(9 downto 0) := (others => '0');                                  
@@ -76,19 +76,19 @@ begin
                             stt <= rstStt; 
                         end if ;
                     when idle =>
-                        if (dlFlag = '1') then
-                            stt <= drawLine; 
+                        if (fdoFlag = '1') then
+                            stt <= fullDisplayOn; 
                         else
                             stt <= idle; 
                         end if ;
-                    when drawLine => 
+                    when fullDisplayOn => 
                         if(LxFlag = '1') then
                             stt <= holdStt; 
                         else
-                            stt <= drawLine; 
+                            stt <= fullDisplayOn; 
                         end if; 
                     when others =>
-                        if (dlDone = '1') then
+                        if (fdoDone = '1') then
                             stt <= idle; 
                         else 
                             stt <= holdStt; 
@@ -103,16 +103,16 @@ begin
         if (rising_edge(clk)) then
             -- Sync Defaults -- 
             byteFlag_t <= '0'; 
-            dlFlag <= '0'; 
-            dlDone <= '0';
+            fdoFlag <= '0'; 
+            fdoDone <= '0';
             rstDone <= '0';
             LxFlag <= '0'; 
 
             case( stt ) is
                 when rstStt =>
                     byteFlag_t <= '0'; 
-                    dlFlag <= '0'; 
-                    dlDone <= '0';
+                    fdoFlag <= '0'; 
+                    fdoDone <= '0';
                     LxFlag <= '0'; 
                     byteCount_t <= (others => '0');
                     DC_t <= (others => '0');  
@@ -120,19 +120,19 @@ begin
                     rstDone <= '1'; 
                 when idle =>
                     if (sw0 = '1') then 
-                        dlFlag <= '1'; 
+                        fdoFlag <= '1'; 
                     else 
                         null; 
                     end if ;
-                when drawLine =>                     
-                        byteCount_t <= std_logic_vector(to_unsigned(5, 4));
+                when fullDisplayOn =>                     
+                        byteCount_t <= std_logic_vector(to_unsigned(1, 4));
                         DC_t <= (others => '0');  
-                        OLEDBytes_t(4 downto 0) <= (x"21", x"01", x"10", x"26", x"04"); 
+                        OLEDBytes_t(0) <= (x"A5"); 
                         byteFlag_t <= '1'; 
                         LxFlag <= '1'; 
                 when others => 
                 if (sw0 = '0') then
-                    dlDone <= '1';  
+                    fdoDone <= '1';  
                 else
                     null; 
                 end if; 

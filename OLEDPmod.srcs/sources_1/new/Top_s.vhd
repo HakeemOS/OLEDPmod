@@ -78,31 +78,13 @@ component OLEDCtrl_s is
     ); 
 end component; 
 
-    -- Old ON Module --
---component OnSeq_s is 
---    generic ( N : integer := 8); 
---    port (  clk : in std_logic; 
---            rst : in std_logic;
---            sw : in std_logic; 
---            byteFlag : out std_logic; 
---            OLEDPRst : out std_logic; 
---            OLEDRdy : out std_logic;                                                                        -- signals to OLEDCtrl On/OFF seq complete 
---            OLEDVbat : out std_logic;
---            OLEDVddc : out std_logic; 
---            rdyFlag : out std_logic; 
---            DCOUT : out std_logic_vector;                                                                   -- vector of D/C bits following same index as array of bytes (i.e corresponding D/C bit of byte at pos 1 also at pos 1 of vector)
---            byteCount : out std_logic_vector(3 downto 0); 
---            OLEDByte : out byteArr         
---    );              
---end component;             
-
-    -- New ON Module -- 
-component initSeq_s is 
+component onCtrl_s is 
     generic (M : integer := 10);                                                                            -- Max buffer size 
     port (  clk : in std_logic; 
             rst : in std_logic;
             sw : in std_logic; 
             byteFlag : out std_logic; 
+            offCmd : out std_logic;                                                                         -- Used to hold srcSel so out command actually captured  
             OLEDPRst : out std_logic; 
             OLEDRdy : out std_logic;                                                                        -- signals to OLEDCtrl On/OFF seq complete 
             OLEDVbat : out std_logic;
@@ -140,6 +122,7 @@ signal byteFlag_w : std_logic := '0';
 signal CS_t : std_logic := '1';                                                                                             -- active low CS
 signal DC_t : std_logic := '0'; 
 signal MOSI_t : std_logic := '0'; 
+signal offCmd_w : std_logic := '0';                                                                                          -- Used to hold srcSel so out command actually captured  
 signal OLEDRdy_w : std_logic := '0'; 
 signal onOffFlag_w : std_logic := '0';
 --signal pin3_t : std_logic := '0';                                                                                         -- pin used to hold unused pin at 0;  
@@ -205,29 +188,8 @@ begin
         OLEDVbatOUT => Vbat_t, 
         OLEDVddcOUT => Vddc_t
     ); 
-    
-    -- Old ON sw module --
-    --OnSeq0 : OnSeq_s
-    --generic map (
-    --    N => 8
-    --)
-    --port map (
-    --    clk => clk_w, 
-    --    rst => rst_w, 
-    --    sw => sw_w, 
-    --    byteFlag => onOffFlag_w, 
-    --    OLEDPRst => PRst_w, 
-    --    OLEDRdy => OLEDRdy_w, 
-    --    OLEDVbat => Vbat_w, 
-    --    OLEDVddc => Vddc_w, 
-    --    rdyFlag => rdy_t, 
-    --    DCOUT => onDC, 
-    --    byteCount => onByteCount,
-    --    OLEDByte => onBytesIN  
-    --); 
 
-    -- New ON sw Module -- 
-    IS0 : initSeq_s 
+    on0 : onCtrl_s 
     generic map (
         M => 10
     )
@@ -236,6 +198,7 @@ begin
         rst => rst_w,
         sw => sw_w,
         byteFlag => onOffFlag_w,
+        offCmd => offCmd_w,
         OLEDPRst => PRst_w, 
         OLEDRdy => OLEDRdy_w, 
         OLEDVbat => Vbat_w, 
@@ -271,6 +234,10 @@ begin
             if (rst = '1') then
                 srcSel <= '0'; 
             elsif (onOffFlag_w = '1') then
+                srcSel <= '1';
+            elsif (onOffFlag_w = '1' and rdy_t = '1') then
+                srcSel <= '1'; 
+            elsif(offCmd_w = '1') then
                 srcSel <= '1';
             elsif (srcSel = '1' and rdy_t = '1') then
                 srcSel <= '0'; 

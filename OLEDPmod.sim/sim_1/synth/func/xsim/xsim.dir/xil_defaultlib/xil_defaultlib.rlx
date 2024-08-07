@@ -2,5 +2,5 @@
 2020.2
 Nov 18 2020
 09:47:47
-C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.sim/sim_1/synth/func/xsim/Top_tb_func_synth.vhd,1720792455,vhdl,,,,bytebuffer_s;initseq_s;oledctrl_s;sclk_s;spi_tx;top_s;userif_s,,,,,,,,
-C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.srcs/sim_1/new/Top_tb.vhd,1719966064,vhdl,,,,top_tb,,,,,,,,
+C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.sim/sim_1/synth/func/xsim/Top_tb_func_synth.vhd,1721174587,vhdl,,,,bytebuffer_s;oledctrl_s;onctrl_s;sclk_s;spi_tx;top_s;userif_s,,,,,,,,
+C:/Users/squid/OneDrive/Documents/Vivado/2024/OLEDPmod/OLEDPmod.srcs/sim_1/new/Top_tb.vhd,1721170196,vhdl,,,,top_tb,,,,,,,,

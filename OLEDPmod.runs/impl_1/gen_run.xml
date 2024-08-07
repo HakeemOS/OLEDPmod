@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<GenRun Id="impl_1" LaunchPart="xc7a35tcpg236-1" LaunchTime="1720792569">
-  <File Type="OPT-HWDEF" Name="Top_s.hwdef"/>
-  <File Type="ROUTE-BUS-SKEW" Name="Top_s_bus_skew_routed.rpt"/>
-  <File Type="PA-DCP" Name="Top_s.dcp"/>
+<GenRun Id="impl_1" LaunchPart="xc7a35tcpg236-1" LaunchTime="1721311137">
   <File Type="BITSTR-BMM" Name="Top_s_bd.bmm"/>
   <File Type="OPT-METHODOLOGY-DRC" Name="Top_s_methodology_drc_opted.rpt"/>
   <File Type="INIT-TIMING" Name="Top_s_timing_summary_init.rpt"/>
@@ -13,6 +10,7 @@
   <File Type="ROUTE-PWR-SUM" Name="Top_s_power_summary_routed.pb"/>
   <File Type="REPORTS-TCL" Name="Top_s_reports.tcl"/>
   <File Type="OPT-DRC" Name="Top_s_drc_opted.rpt"/>
+  <File Type="OPT-HWDEF" Name="Top_s.hwdef"/>
   <File Type="PWROPT-DCP" Name="Top_s_pwropt.dcp"/>
   <File Type="PWROPT-DRC" Name="Top_s_drc_pwropted.rpt"/>
   <File Type="PWROPT-TIMING" Name="Top_s_timing_summary_pwropted.rpt"/>
@@ -50,6 +48,7 @@
   <File Type="ROUTE-TIMING-RPX" Name="Top_s_timing_summary_routed.rpx"/>
   <File Type="ROUTE-SIMILARITY" Name="Top_s_incremental_reuse_routed.rpt"/>
   <File Type="ROUTE-CLK" Name="Top_s_clock_utilization_routed.rpt"/>
+  <File Type="ROUTE-BUS-SKEW" Name="Top_s_bus_skew_routed.rpt"/>
   <File Type="ROUTE-BUS-SKEW-PB" Name="Top_s_bus_skew_routed.pb"/>
   <File Type="ROUTE-BUS-SKEW-RPX" Name="Top_s_bus_skew_routed.rpx"/>
   <File Type="POSTROUTE-PHYSOPT-DCP" Name="Top_s_postroute_physopt.dcp"/>
@@ -105,7 +104,7 @@
         <Attr Name="UsedIn" Val="simulation"/>
       </FileInfo>
     </File>
-    <File Path="$PSRCDIR/sources_1/new/initSeq_s.vhd">
+    <File Path="$PSRCDIR/sources_1/new/onCtrl_s.vhd">
       <FileInfo>
         <Attr Name="UsedIn" Val="synthesis"/>
         <Attr Name="UsedIn" Val="simulation"/>
@@ -125,13 +124,6 @@
     </File>
     <File Path="$PSRCDIR/sources_1/new/Top_s.vhd">
       <FileInfo>
-        <Attr Name="UsedIn" Val="synthesis"/>
-        <Attr Name="UsedIn" Val="simulation"/>
-      </FileInfo>
-    </File>
-    <File Path="$PSRCDIR/sources_1/new/onSeq_S.vhd">
-      <FileInfo>
-        <Attr Name="AutoDisabled" Val="1"/>
         <Attr Name="UsedIn" Val="synthesis"/>
         <Attr Name="UsedIn" Val="simulation"/>
       </FileInfo>

@@ -55,7 +55,7 @@ component Top_s is
 end component; 
 
     -- Signals -- 
-signal clk, rst, sw, sw0, CS, DC, MOSI, PRst, sclk, Vbat, Vddc : std_logic; 
+signal clk, rst, sw, sw0, CS, DC, MOSI, PRst, rdy, sclk, Vbat, Vddc : std_logic; 
     -- clk Signals -- 
 signal clk_period : time := 10ns; 
 signal clk_stop : boolean; 
@@ -81,6 +81,7 @@ begin
         DC => DC, 
         MOSI => MOSI, 
         PRst => PRst, 
+        rdy => rdy, 
         sclk => sclk, 
         Vbat => Vbat, 
         Vddc => Vddc 
@@ -97,7 +98,7 @@ begin
 
         sw <= '1'; 
 
-        wait for 255ms; 
+        wait for 120ms; 
 
         sw0 <= '1'; 
 
